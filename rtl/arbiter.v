@@ -1,25 +1,43 @@
 module arbiter
 (
 
-	input clk,
+	input clk, rstn,
 	input breq1, breq2,  //bus requests from 2 masters
 	
-	output reg [1:0] bgrant  //bus grant or master select
+	output reg bgrant1, bgrant2,  //bus grant signalss for 2 masters
+	output reg msel //master select; 0 - master 1, 1 - master 2
 );
 
 
 //priority based:high priority for master 1 - breq1
 
 always @(posedge clk) begin
-	if (breq1 && breq2)       // If both masters request 
-		bgrant <= 2'b11;       // Master 1
-	else if (breq1)           //
-		bgrant <= 2'b11;       // Master 1 
-	else if (breq2)           // 
-		bgrant <= 2'b10;       // Master 2 
-	else                   
-		bgrant <= 2'b00;       // Bus Idle
+	if (!rstn) begin
+		msel <= 1'b0;
+		bgrant1 <= 1'b0;
+		bgrant2 <= 1'b0;
+	end
+	else 
+		if (breq1 && breq2) begin      // If both masters request 
+			msel <= 1'b0;       // Master 1 
+			bgrant1 <= 1'b1;
+			bgrant2 <= 1'b0;
+		end
+		else if (breq1) begin          
+			msel <= 1'b0;       // Master 1 
+			bgrant1 <= 1'b1;
+			bgrant2 <= 1'b0;
+		end
+		else if (breq2) begin           
+			msel <= 1'b1;       // Master 2 
+			bgrant1 <= 1'b0;
+			bgrant2 <= 1'b1;
+		end
+		else begin                  
+			msel <= msel;       // Bus Idle - previous value remains
+			bgrant1 <= bgrant1;
+			bgrant2 <= bgrant2;
+		end
 end
- 
 
 endmodule
