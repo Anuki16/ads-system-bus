@@ -15,7 +15,11 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 	output reg mwdata,	// write data and address
 	output mmode,	// 0 -  read, 1 - write
 	output reg mvalid,	// wdata valid
-	input svalid	// rdata valid
+	input svalid,	// rdata valid
+
+	// Signals to arbiter
+	output mbreq,
+	input mbgrant
 );
 	localparam SLAVE_ADDR_WIDTH = 4;	// Part of address to identify slave
 	localparam SLAVE_MEM_ADDR_WIDTH = ADDR_WIDTH - SLAVE_ADDR_WIDTH;	// part of address to identify memory address
@@ -35,7 +39,8 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
     localparam IDLE  = 3'b000,    
                ADDR  = 3'b001, 	// Send address to slave
                RDATA = 3'b010,    // Read data from slave
-			   WDATA = 3'b011;	// Write data to slave
+			   WDATA = 3'b011,	// Write data to slave
+			   REQ 	 = 3'b101;	// Request bus access
 
 	// State variables
 	reg [2:0] state, next_state;
@@ -43,7 +48,8 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 	// Next state logic
 	always @(*) begin
 		case (state)
-			IDLE  : next_state = (dvalid) ? ADDR : IDLE;
+			IDLE  : next_state = (dvalid) ? REQ : IDLE;
+			REQ	  : next_state = (mbgrant) ? ADDR : REQ;
 			ADDR  : next_state = (counter == SLAVE_MEM_ADDR_WIDTH-1) ? ((mode) ? WDATA : RDATA) : ADDR;
 			RDATA : next_state = (svalid && (counter == DATA_WIDTH-1)) ? IDLE : RDATA;
 			WDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : WDATA;
@@ -60,6 +66,7 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 	assign dready = (state == IDLE);
 	assign drdata = rdata;
 	assign mmode = mode;
+	assign mbreq = (state != IDLE);		// Keep bus request while master is in need of the bus
 
 	// Sequential output logic
 	always @(posedge clk) begin
@@ -87,6 +94,10 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 						addr <= addr;
 						mode <= mode;
 					end
+				end
+
+				REQ : begin
+					
 				end
 
 				ADDR : begin	// Send slave mem address
