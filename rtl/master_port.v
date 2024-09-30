@@ -95,13 +95,13 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 
 					if (counter == SLAVE_MEM_ADDR_WIDTH-1) begin
 						counter <= 'b0;
-						mvalid <= 1'b0;
 					end else begin
 						counter <= counter + 1;
 					end
 				end
 
 				RDATA : begin	// Receive data from slave
+					mvalid <= 1'b0;
 					if (svalid) begin
 						rdata[counter] <= mrdata;
 
@@ -123,7 +123,6 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 
 					if (counter == DATA_WIDTH-1) begin
 						counter <= 'b0;
-						mvalid <= 1'b0;
 					end else begin
 						counter <= counter + 1;
 					end
