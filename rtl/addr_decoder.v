@@ -33,7 +33,8 @@ module addr_decoder #(
     // States
     localparam IDLE  = 2'b00,    
                ADDR  = 2'b01, 	// Receive address from master
-               CONNECT = 2'b10;  // Enable correct slave connection
+               CONNECT = 2'b10,  // Enable correct slave connection
+               WAIT = 2'b11;
 
     // State variables
 	reg [1:0] state, next_state;
@@ -43,7 +44,8 @@ module addr_decoder #(
 		case (state)
 			IDLE    : next_state = (mvalid) ? ADDR : IDLE;
 			ADDR    : next_state = (counter == DEVICE_ADDR_WIDTH-1) ? CONNECT : ADDR;
-			CONNECT : next_state = (!mvalid) ? IDLE : CONNECT;  // mvalid no longer needed
+			CONNECT : next_state = (mvalid) ? WAIT : CONNECT;  
+            WAIT    : next_state = (!mvalid) ? IDLE : WAIT;
 			default: next_state = IDLE;
 		endcase
 	end
@@ -93,6 +95,11 @@ module addr_decoder #(
                     slave_en <= 1;
                     ssel <= slave_addr[1:0];
 				end
+
+                WAIT : begin
+                    slave_en <= 1;
+                    ssel <= slave_addr[1:0];
+                end
 				
 				default: begin
 					slave_addr <= slave_addr;

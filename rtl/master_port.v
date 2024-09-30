@@ -119,7 +119,7 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 				end
 
 				WAIT : begin
-					
+					mvalid <= 1'b0;
 				end
 
 				ADDR : begin	// Send slave mem address

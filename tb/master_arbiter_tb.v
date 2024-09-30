@@ -108,7 +108,7 @@ module master_arbiter_tb;
 
         wait (dready == 1);
 
-        #30 $finish;
+        #50 $finish;
     end
 
 
