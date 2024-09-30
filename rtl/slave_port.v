@@ -72,6 +72,16 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 				IDLE : begin
 					counter <= 'b0;
 					svalid <= 0;
+					
+					if (mvalid) begin
+						addr[counter] <= swdata;
+						counter <= counter + 1;						
+					end else begin
+						addr <= addr;
+						counter <= counter;
+					end
+					
+					
 				end
 				
 				ADDR : begin
