@@ -13,8 +13,8 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 	// Signals connecting to serial bus
 	input mrdata,	// read data
 	output reg mwdata,	// write data and address
-	output reg mmode,	// 0 -  read, 1 - write
-	output mvalid,	// wdata valid
+	output mmode,	// 0 -  read, 1 - write
+	output reg mvalid,	// wdata valid
 	input svalid	// rdata valid
 );
 	localparam SLAVE_ADDR_WIDTH = 4;	// Part of address to identify slave
@@ -58,6 +58,7 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 
 	// Combinational output assignments
 	assign dready = (state == IDLE);
+	assign drdata = rdata;
 	assign mmode = mode;
 
 	// Sequential output logic
