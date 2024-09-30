@@ -19,10 +19,13 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 
 	// Signals to arbiter
 	output mbreq,
-	input mbgrant
+	input mbgrant,
+
+	// Acknowledgement from address decoder 
+	input ack
 );
-	localparam SLAVE_ADDR_WIDTH = 4;	// Part of address to identify slave
-	localparam SLAVE_MEM_ADDR_WIDTH = ADDR_WIDTH - SLAVE_ADDR_WIDTH;	// part of address to identify memory address
+	localparam SLAVE_DEVICE_ADDR_WIDTH = 4;	// Part of address to identify slave
+	localparam SLAVE_MEM_ADDR_WIDTH = ADDR_WIDTH - SLAVE_DEVICE_ADDR_WIDTH;	// part of address to identify memory address
 
 	/* Internal signals */
 
@@ -40,7 +43,9 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
                ADDR  = 3'b001, 	// Send address to slave
                RDATA = 3'b010,    // Read data from slave
 			   WDATA = 3'b011,	// Write data to slave
-			   REQ 	 = 3'b101;	// Request bus access
+			   REQ 	 = 3'b100,	// Request bus access
+			   SADDR = 3'b101,
+			   WAIT  = 3'b110;	// Send slave device address
 
 	// State variables
 	reg [2:0] state, next_state;
@@ -49,7 +54,9 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 	always @(*) begin
 		case (state)
 			IDLE  : next_state = (dvalid) ? REQ : IDLE;
-			REQ	  : next_state = (mbgrant) ? ADDR : REQ;
+			REQ	  : next_state = (mbgrant) ? SADDR : REQ;
+			SADDR : next_state = (counter == SLAVE_DEVICE_ADDR_WIDTH-1) ? WAIT : SADDR;
+			WAIT  : next_state = (ack) ? ADDR : WAIT;
 			ADDR  : next_state = (counter == SLAVE_MEM_ADDR_WIDTH-1) ? ((mode) ? WDATA : RDATA) : ADDR;
 			RDATA : next_state = (svalid && (counter == DATA_WIDTH-1)) ? IDLE : RDATA;
 			WDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : WDATA;
@@ -97,6 +104,21 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 				end
 
 				REQ : begin
+					
+				end
+
+				SADDR : begin	// Send slave device address
+					mwdata <= addr[SLAVE_MEM_ADDR_WIDTH + counter];
+					mvalid <= 1'b1;
+
+					if (counter == SLAVE_DEVICE_ADDR_WIDTH-1) begin
+						counter <= 'b0;
+					end else begin
+						counter <= counter + 1;
+					end
+				end
+
+				WAIT : begin
 					
 				end
 

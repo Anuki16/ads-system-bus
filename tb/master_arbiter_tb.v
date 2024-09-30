@@ -4,6 +4,7 @@ module master_arbiter_tb;
     // Parameters
     parameter ADDR_WIDTH = 16;
     parameter DATA_WIDTH = 8;
+    parameter DEVICE_ADDR_WIDTH = 4;
 
     // DUT Signals
     reg clk, rstn;
@@ -19,9 +20,14 @@ module master_arbiter_tb;
     wire mmode;					  // 0 - read, 1 - write
     wire mvalid;				  // Write data valid
     reg svalid;					  // Read data valid from serial bus
+    wire ack;
 
     // Arbiter signals
     wire breq1, bgrant1, bgrant2, msel;
+
+    // Decoder signals
+    wire mvalid1, mvalid2, mvalid3;
+    wire ssel;
 
     // Instantiate the DUT (Device Under Test)
     master_port #(
@@ -42,7 +48,8 @@ module master_arbiter_tb;
         .mvalid(mvalid),
         .svalid(svalid),
         .mbreq(breq1),
-        .mbgrant(bgrant1)
+        .mbgrant(bgrant1),
+        .ack(ack)
     );
 
     arbiter arb (
@@ -53,6 +60,21 @@ module master_arbiter_tb;
         .bgrant1(bgrant1),
         .bgrant2(bgrant2),
         .msel(msel)
+    );
+
+    addr_decoder #(
+        .ADDR_WIDTH(ADDR_WIDTH),
+        .DEVICE_ADDR_WIDTH(DEVICE_ADDR_WIDTH)
+    ) decoder (
+        .clk(clk),
+        .rstn(rstn),
+        .mwdata(mwdata),
+        .mvalid(mvalid),
+        .mvalid1(mvalid1),
+        .mvalid2(mvalid2),
+        .mvalid3(mvalid3),
+        .ssel(ssel),
+        .ack(ack)
     );
 
     // Generate Clock
@@ -76,7 +98,7 @@ module master_arbiter_tb;
         // Write Operation: Sending data to the bus
         wait (dready == 1);
         @(posedge clk);
-        daddr = 16'h1234;  // Set address
+        daddr = 16'h9234;  // Set address
         dwdata = 8'hAA;    // Write data value
         dmode = 1;         // Set mode to write
         dvalid = 1;        // Assert valid signal
@@ -86,7 +108,7 @@ module master_arbiter_tb;
 
         wait (dready == 1);
 
-        #10 $finish;
+        #30 $finish;
     end
 
 
