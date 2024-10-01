@@ -1,4 +1,4 @@
-module slave #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 32, MEM_SIZE = 4096)
+module slave_memory #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 32, MEM_SIZE = 4096)
 (
 
 	input clk, rstn, wen, ren,
