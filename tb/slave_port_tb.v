@@ -53,10 +53,11 @@ module slave_port_tb;
 		#10;
 		$display("Starting write operation...");
 		mvalid = 1;
+		swdata = 1;
 		smode = 1; // Write mode
 
-		// Send address (e.g., 12'b110100110101)
-		#10 swdata = 1; // MSB first
+		// Send address (e.g., 12'b110100110101)101011001011
+		//#10 swdata = 1; // LSB first
 		#10 swdata = 1;
 		#10 swdata = 0;
 		#10 swdata = 1;
@@ -79,9 +80,10 @@ module slave_port_tb;
 		#10 swdata = 1;
 		#10 swdata = 0; // LSB
 
+		#10 mvalid = 0;
+
 		// End the write operation
-		#10;
-		mvalid = 0;
+		#100;
 		smode = 0;
 
 		#20;
@@ -90,9 +92,10 @@ module slave_port_tb;
 		$display("Starting read operation...");
 		mvalid = 1;
 		smode = 0; // Read mode
+		swdata = 1;
 
 		// Send address (same as write, 12'b110100110101)
-		#10 swdata = 1; // MSB first
+		// #10 swdata = 1; // MSB first
 		#10 swdata = 1;
 		#10 swdata = 0;
 		#10 swdata = 1;
@@ -104,6 +107,8 @@ module slave_port_tb;
 		#10 swdata = 1;
 		#10 swdata = 0;
 		#10 swdata = 1; // LSB
+
+		#10 mvalid = 0;
 
 		// Simulate data ready in slave memory (e.g., 8'b11001100)
 		#10;
