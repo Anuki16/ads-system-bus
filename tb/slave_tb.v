@@ -26,7 +26,8 @@ module slave_tb;
         .srdata(srdata),
         .smode(smode),
         .mvalid(mvalid),
-        .svalid(svalid)
+        .svalid(svalid),
+        .sready(sready)
     );
 
     // Clock generation

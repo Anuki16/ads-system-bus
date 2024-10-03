@@ -3,10 +3,11 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
     input clk, rstn,
     // Signals connecting to serial bus
 	input swdata,	// write data and address from master
-	output wire srdata,	// read data to the master
+	output srdata,	// read data to the master
 	input smode,	// 0 -  read, 1 - write, from master
 	input mvalid,	// wdata valid - (recieving data and address from master)
-	output wire svalid	// rdata valid - (sending data from slave)
+	output svalid,	// rdata valid - (sending data from slave)
+    output sready //slave is ready for transaction
 );
 
 	wire [DATA_WIDTH-1:0] smemrdata;
@@ -31,7 +32,8 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
         .srdata(srdata),
         .smode(smode),
         .mvalid(mvalid),	
-        .svalid(svalid)	
+        .svalid(svalid),	
+        .sready(sready)
     );
 
 
