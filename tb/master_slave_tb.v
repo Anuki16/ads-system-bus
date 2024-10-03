@@ -4,6 +4,7 @@ module master_slave_tb;
     // Parameters
     parameter ADDR_WIDTH = 16;
     parameter DATA_WIDTH = 8;
+    parameter SLAVE_MEM_ADDR_WIDTH = 12;
 
     // DUT Signals
     reg clk, rstn;
@@ -14,17 +15,17 @@ module master_slave_tb;
     wire dready;
     reg dmode;					  // 0 - read, 1 - write
 
-    reg mrdata;					  // Read data from serial bus
+    wire mrdata;					  // Read data from serial bus
     wire mwdata;				  // Write data to serial bus
     wire mmode;					  // 0 - read, 1 - write
     wire mvalid;				  // Write data valid
-    reg svalid;					  // Read data valid from serial bus
+    wire svalid;					  // Read data valid from serial bus
 
     // Instantiate the DUT (Device Under Test)
     master_port #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
-    ) master (
+    ) master_dev (
         .clk(clk),
         .rstn(rstn),
         .dwdata(dwdata),
@@ -38,6 +39,20 @@ module master_slave_tb;
         .mmode(mmode),
         .mvalid(mvalid),
         .svalid(svalid)
+    );
+
+    // Initialize slave
+    slave #(
+        .ADDR_WIDTH(SLAVE_MEM_ADDR_WIDTH),
+        .DATA_WIDTH(DATA_WIDTH)
+    ) slave_dev (
+        .clk(clk),
+        .rstn(rstn),
+        .srdata(mrdata),
+        .swdata(mwdata),
+        .smode(mmode),
+        .svalid(svalid),
+        .mvalid(mvalid)
     );
 
     // Generate Clock
@@ -56,11 +71,9 @@ module master_slave_tb;
         // Reset the DUT
         rstn = 0;
         dvalid = 0;
-        svalid = 0;
         dwdata = 8'b0;
         daddr = 16'b0;
         dmode = 0;
-        mrdata = 0;
         #15 rstn = 1; // Release reset after 15 time units
 
         // Repeat the write and read tests 10 times
@@ -81,9 +94,9 @@ module master_slave_tb;
             dvalid = 0;
             wait (dready == 1);
 
-            #10;
-            if (slave.mem[daddr[11:0]] != dwdata) begin
-                $display("Write failed at iteration %0d: location %x, expected %x, actual %x", i, daddr[11:0], dwdata, slave.mem[daddr[11:0]]);
+            #50;
+            if (slave_dev.sm.memory[daddr[11:0]] != dwdata) begin
+                $display("Write failed at iteration %0d: location %x, expected %x, actual %x", i, daddr[11:0], dwdata, slave_dev.sm.memory[daddr[11:0]]);
             end else begin
                 $display("Write successful at iteration %0d", i);
             end
@@ -98,9 +111,9 @@ module master_slave_tb;
             dvalid = 0;
             wait (dready == 1);
 
-            #10;
-            if (slave.mem[daddr[11:0]] != drdata) begin
-                $display("Read failed at iteration %0d: location %x, expected %x, actual %x", i, daddr[11:0], slave.mem[daddr[11:0]], drdata);
+            #50;
+            if (slave_dev.sm.memory[daddr[11:0]] != drdata) begin
+                $display("Read failed at iteration %0d: location %x, expected %x, actual %x", i, daddr[11:0], slave_dev.sm.memory[daddr[11:0]], drdata);
             end else begin
                 $display("Read successful at iteration %0d", i);
             end
