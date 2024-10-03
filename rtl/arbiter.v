@@ -6,7 +6,7 @@ module arbiter
 	output reg bgrant1, bgrant2,  //bus grant signals for 2 masters
 	output reg msel //master select; 0 - master 1, 1 - master 2
 );
-
+	
 	//priority based: high priority for master 1 - breq1
 
 	always @(posedge clk) begin

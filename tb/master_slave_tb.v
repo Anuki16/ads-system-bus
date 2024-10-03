@@ -21,6 +21,9 @@ module master_slave_tb;
     wire mvalid;				  // Write data valid
     wire svalid;					  // Read data valid from serial bus
 
+    // Arbiter signals
+    wire breq1, bgrant1, bgrant2, msel;
+
     // Instantiate the DUT (Device Under Test)
     master_port #(
         .ADDR_WIDTH(ADDR_WIDTH),
@@ -38,7 +41,9 @@ module master_slave_tb;
         .mwdata(mwdata),
         .mmode(mmode),
         .mvalid(mvalid),
-        .svalid(svalid)
+        .svalid(svalid),
+        .mbreq(breq1),
+        .mbgrant(bgrant1)
     );
 
     // Initialize slave
@@ -53,6 +58,17 @@ module master_slave_tb;
         .smode(mmode),
         .svalid(svalid),
         .mvalid(mvalid)
+    );
+
+    // Arbiter
+    arbiter arbiter_dev (
+        .clk(clk),
+        .rstn(rstn),
+        .breq1(breq1),
+        .breq2(0),
+        .bgrant1(bgrant1),
+        .bgrant2(bgrant2),
+        .msel(msel)
     );
 
     // Generate Clock
