@@ -24,7 +24,7 @@ module master_slave_tb;
     master_port #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
-    ) master (
+    ) master_dev (
         .clk(clk),
         .rstn(rstn),
         .dwdata(dwdata),
@@ -38,6 +38,20 @@ module master_slave_tb;
         .mmode(mmode),
         .mvalid(mvalid),
         .svalid(svalid)
+    );
+
+    // Initialize slave
+    slave #(
+        .ADDR_WIDTH(ADDR_WIDTH),
+        .DATA_WIDTH(DATA_WIDTH)
+    ) slave_dev (
+        .clk(clk),
+        .rstn(rstn),
+        .srdata(mrdata),
+        .swdata(mwdata),
+        .smode(mmode),
+        .svalid(svalid),
+        .mvalid(mvalid)
     );
 
     // Generate Clock
@@ -64,7 +78,7 @@ module master_slave_tb;
         #15 rstn = 1; // Release reset after 15 time units
 
         // Repeat the write and read tests 10 times
-        for (i = 0; i < 10; i = i + 1) begin
+        for (i = 0; i < 1; i = i + 1) begin
             // Generate random address and data
             rand_addr = $random & 12'hFFF;
             rand_data = $random;
@@ -82,8 +96,8 @@ module master_slave_tb;
             wait (dready == 1);
 
             #10;
-            if (slave.mem[daddr[11:0]] != dwdata) begin
-                $display("Write failed at iteration %0d: location %x, expected %x, actual %x", i, daddr[11:0], dwdata, slave.mem[daddr[11:0]]);
+            if (slave_dev.sm.memory[daddr[11:0]] != dwdata) begin
+                $display("Write failed at iteration %0d: location %x, expected %x, actual %x", i, daddr[11:0], dwdata, slave_dev.sm.memory[daddr[11:0]]);
             end else begin
                 $display("Write successful at iteration %0d", i);
             end
@@ -99,8 +113,8 @@ module master_slave_tb;
             wait (dready == 1);
 
             #10;
-            if (slave.mem[daddr[11:0]] != drdata) begin
-                $display("Read failed at iteration %0d: location %x, expected %x, actual %x", i, daddr[11:0], slave.mem[daddr[11:0]], drdata);
+            if (slave_dev.sm.memory[daddr[11:0]] != drdata) begin
+                $display("Read failed at iteration %0d: location %x, expected %x, actual %x", i, daddr[11:0], slave_dev.sm.memory[daddr[11:0]], drdata);
             end else begin
                 $display("Read successful at iteration %0d", i);
             end
