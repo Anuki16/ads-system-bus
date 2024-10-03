@@ -14,7 +14,7 @@ reg [DATA_WIDTH - 1:0] memory [(MEM_SIZE / (DATA_WIDTH / 8))-1:0];
 
 integer i;
 
-assign waddr = addr[ADDR_WIDTH-1:2];
+//assign waddr = addr[ADDR_WIDTH-1:0];
  
 always @(posedge clk) begin
 	if (!rstn) begin
@@ -29,6 +29,6 @@ always @(posedge clk) begin
 	end
 end
  
-assign rdata = (ren==1'b1) ? memory[waddr]: 32'd0; 
+assign rdata = (ren==1'b1) ? memory[addr]: 32'd0; 
 
 endmodule
