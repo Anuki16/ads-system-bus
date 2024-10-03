@@ -15,7 +15,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 	input smode,	// 0 -  read, 1 - write, from master
 	input mvalid,	// wdata valid - (recieving data and address from master)
 	output reg svalid,	// rdata valid - (sending data from slave)
-	output sready
+	output sready //slave is ready for transaction
 );
 
 	/* Internal signals */
@@ -32,8 +32,8 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
     localparam IDLE  = 3'b000,    //0
                ADDR  = 3'b001, 	// Receive address from slave //1
                RDATA = 3'b010,    // Send data to master //2
-					WDATA = 3'b011,	// Receive data from master //3
-					SREADY = 3'b101; //5
+			   WDATA = 3'b011,	// Receive data from master //3
+			   SREADY = 3'b101; //5
 	// State variables
 	reg [2:0] state, next_state;
 
@@ -55,8 +55,6 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 	end
 
 	// Combinational output assignments
-//	assign smemwdata = wdata;
-//	assign smemaddr = addr;
 	assign rdata =	smemrdata;
 	assign sready = (state == IDLE);
 
