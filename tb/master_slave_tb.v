@@ -20,6 +20,7 @@ module master_slave_tb;
     wire mmode;					  // 0 - read, 1 - write
     wire mvalid;				  // Write data valid
     wire svalid;					  // Read data valid from serial bus
+    wire sready;
 
     // Arbiter signals
     wire breq1, bgrant1, bgrant2, msel;
@@ -57,7 +58,8 @@ module master_slave_tb;
         .swdata(mwdata),
         .smode(mmode),
         .svalid(svalid),
-        .mvalid(mvalid)
+        .mvalid(mvalid),
+        .sready(sready)
     );
 
     // Arbiter
@@ -68,7 +70,10 @@ module master_slave_tb;
         .breq2(0),
         .bgrant1(bgrant1),
         .bgrant2(bgrant2),
-        .msel(msel)
+        .msel(msel),
+        .sready1(sready),
+        .sready2(1),
+        .sready3(1)
     );
 
     // Generate Clock
@@ -108,9 +113,9 @@ module master_slave_tb;
 
             #20;
             dvalid = 0;
-            wait (dready == 1);
+            wait (dready == 1 && sready == 1);
 
-            #50;
+            #20;
             if (slave_dev.sm.memory[daddr[11:0]] != dwdata) begin
                 $display("Write failed at iteration %0d: location %x, expected %x, actual %x", i, daddr[11:0], dwdata, slave_dev.sm.memory[daddr[11:0]]);
             end else begin
@@ -125,9 +130,9 @@ module master_slave_tb;
 
             #20;
             dvalid = 0;
-            wait (dready == 1);
+            wait (dready == 1 && sready == 1);
 
-            #50;
+            #20;
             if (slave_dev.sm.memory[daddr[11:0]] != drdata) begin
                 $display("Read failed at iteration %0d: location %x, expected %x, actual %x", i, daddr[11:0], slave_dev.sm.memory[daddr[11:0]], drdata);
             end else begin
