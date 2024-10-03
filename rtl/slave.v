@@ -1,28 +1,51 @@
-module slave #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 32, MEM_SIZE = 4096)
+module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 (
-
-	input clk, rstn, wen, ren,
-	
-	input [ADDR_WIDTH-1:0] addr, //input address of slave
-	input [DATA_WIDTH-1:0] wdata, // data to be written in the slave
-
-	output [DATA_WIDTH-1:0] rdata // data to be read from the slave
+    input clk, rstn,
+    // Signals connecting to serial bus
+	input swdata,	// write data and address from master
+	output wire srdata,	// read data to the master
+	input smode,	// 0 -  read, 1 - write, from master
+	input mvalid,	// wdata valid - (recieving data and address from master)
+	output wire svalid	// rdata valid - (sending data from slave)
 );
 
+	wire [DATA_WIDTH-1:0] smemrdata;
+	wire smemwen;
+    wire smemren; 
+	wire [ADDR_WIDTH-1:0] smemaddr; 
+	wire [DATA_WIDTH-1:0] smemwdata;
 
-reg [DATA_WIDTH - 1:0] memory [(MEM_SIZE / (DATA_WIDTH / 8))-1:0];
 
-//define memory
+    slave_port #(
+        .ADDR_WIDTH(ADDR_WIDTH),
+        .DATA_WIDTH(DATA_WIDTH)
+    )sp(
+        .clk(clk), 
+        .rstn(rstn),
+        .smemrdata(smemrdata),
+        .smemwen(smemwen), 
+        .smemren(smemren),
+        .smemaddr(smemaddr), 
+        .smemwdata(smemwdata),
+        .swdata(swdata),
+        .srdata(srdata),
+        .smode(smode),
+        .mvalid(mvalid),	
+        .svalid(svalid)	
+    );
 
-assign waddr = addr[ADDR_WIDTH-1:2];
- 
-always @(posedge clk) begin
-	//if !rstn reset slave memory
-	//else
-	if (wen)
-		memory[waddr] <= wdata;
-end
- 
-assign rdata = (ren==1'b1) ? memory[waddr]: 32'd0; 
+
+    slave_memory #(
+        .ADDR_WIDTH(ADDR_WIDTH),
+        .DATA_WIDTH(DATA_WIDTH)
+    )sm(
+        .clk(clk), 
+        .rstn(rstn), 
+        .wen(smemwen),
+        .ren(smemren),
+        .addr(smemaddr), 
+        .wdata(smemwdata), 
+        .rdata(smemrdata) 
+    );
 
 endmodule
