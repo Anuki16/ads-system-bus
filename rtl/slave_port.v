@@ -14,7 +14,8 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 	output reg srdata,	// read data to the master
 	input smode,	// 0 -  read, 1 - write, from master
 	input mvalid,	// wdata valid - (recieving data and address from master)
-	output reg svalid	// rdata valid - (sending data from slave)
+	output reg svalid,	// rdata valid - (sending data from slave)
+	output sready
 );
 
 	/* Internal signals */
@@ -23,7 +24,6 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 	reg [DATA_WIDTH-1:0] wdata;  //write data from master
 	reg [ADDR_WIDTH-1:0] addr;
 	wire [DATA_WIDTH-1:0] rdata;	//read data from slave memory
-	reg sready; //slave is ready to send data
 	reg mode;
 	// counters
 	reg [7:0] counter;
@@ -58,7 +58,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 //	assign smemwdata = wdata;
 //	assign smemaddr = addr;
 	assign rdata =	smemrdata;
-
+	assign sready = (state == IDLE);
 
 	// Sequential output logic
 	always @(posedge clk) begin
@@ -69,7 +69,6 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 			svalid <= 0;
 			smemren <= 0;
 			smemwen <= 0;
-			sready <= 0;
 			mode <= 0;
 			smemaddr <= 0;
 			smemwdata <= 0;
@@ -115,7 +114,6 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 			
 				SREADY: begin
 
-//					sready <= 1'b1;
 					svalid <= 1'b0;
 					if (mode) begin
 						smemwen <= 1'b1;
