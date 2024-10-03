@@ -24,7 +24,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 	reg [ADDR_WIDTH-1:0] addr;
 	wire [DATA_WIDTH-1:0] rdata;	//read data from slave memory
 	reg sready; //slave is ready to send data
-
+	reg mode;
 	// counters
 	reg [7:0] counter;
 
@@ -70,6 +70,10 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 			smemren <= 0;
 			smemwen <= 0;
 			sready <= 0;
+			mode <= 0;
+			smemaddr <= 0;
+			smemwdata <= 0;
+			srdata <= 0;
 		end
 		else begin
 			case (state)
@@ -79,11 +83,13 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 					svalid <= 0;
 					
 					if (mvalid) begin
+						mode <= smode;
 						addr[counter] <= swdata;
 						counter <= counter + 1;						
 					end else begin
 						addr <= addr;
 						counter <= counter;
+						mode <= mode;
 					end
 					
 					
@@ -111,7 +117,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 
 //					sready <= 1'b1;
 					svalid <= 1'b0;
-					if (smode) begin
+					if (mode) begin
 						smemwen <= 1'b1;
 						smemwdata <= wdata;
 						smemaddr <= addr;
