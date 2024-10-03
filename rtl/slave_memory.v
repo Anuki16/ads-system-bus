@@ -1,4 +1,4 @@
-module slave_memory #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 32, MEM_SIZE = 4096)
+module slave_memory #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, MEM_SIZE = 4096)
 (
 
 	input clk, rstn, wen, ren,
@@ -12,15 +12,21 @@ module slave_memory #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 32, MEM_SIZE = 409
 
 reg [DATA_WIDTH - 1:0] memory [(MEM_SIZE / (DATA_WIDTH / 8))-1:0];
 
-//define memory
+integer i;
 
 assign waddr = addr[ADDR_WIDTH-1:2];
  
 always @(posedge clk) begin
-	//if !rstn reset slave memory
-	//else
-	if (wen)
-		memory[waddr] <= wdata;
+	if (!rstn) begin
+		// Reset memory when rstn is low
+		for (i = 0; i < (MEM_SIZE / (DATA_WIDTH / 8)); i = i + 1) begin
+			memory[i] <= {DATA_WIDTH{1'b0}};
+		end
+	end else begin
+		if (wen) begin
+			memory[addr] <= wdata;
+		end
+	end
 end
  
 assign rdata = (ren==1'b1) ? memory[waddr]: 32'd0; 

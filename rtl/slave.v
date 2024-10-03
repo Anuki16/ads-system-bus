@@ -3,10 +3,10 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
     input clk, rstn,
     // Signals connecting to serial bus
 	input swdata,	// write data and address from master
-	output reg srdata,	// read data to the master
+	output wire srdata,	// read data to the master
 	input smode,	// 0 -  read, 1 - write, from master
 	input mvalid,	// wdata valid - (recieving data and address from master)
-	output reg svalid	// rdata valid - (sending data from slave)
+	output wire svalid	// rdata valid - (sending data from slave)
 );
 
 	wire [DATA_WIDTH-1:0] smemrdata;
@@ -40,7 +40,7 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
         .DATA_WIDTH(DATA_WIDTH)
     )sm(
         .clk(clk), 
-        .rst(rstn), 
+        .rstn(rstn), 
         .wen(smemwen),
         .ren(smemren),
         .addr(smemaddr), 
