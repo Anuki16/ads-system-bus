@@ -26,7 +26,7 @@ module master_slave_tb;
     wire breq1, bgrant1, bgrant2, msel;
 
     // Instantiate the DUT (Device Under Test)
-    master_port #(
+    master_port_v1 #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) master_dev (

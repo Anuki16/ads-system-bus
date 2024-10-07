@@ -43,7 +43,7 @@ module master2_slave1_tb;
     wire         s_ready;
 
     // Instantiate masters
-    master_port #(
+    master_port_v1 #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) master1 (
@@ -64,7 +64,7 @@ module master2_slave1_tb;
         .mbgrant(m1_bgrant)
     );
 
-    master_port #(
+    master_port_v1 #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) master2 (
