@@ -52,7 +52,8 @@ module master_slave_tb;
         .swdata(mwdata),
         .smode(mmode),
         .svalid(svalid),
-        .mvalid(mvalid)
+        .mvalid(mvalid),
+        .sready(sready)
     );
 
     // Generate Clock
