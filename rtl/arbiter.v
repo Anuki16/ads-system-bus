@@ -26,9 +26,9 @@ module arbiter
 	// Next state logic
 	always @(*) begin
 		case (state)
-			IDLE  : next_state = (breq1) ? M1 : (breq2) ? M2 : IDLE;
+			IDLE  : next_state = (breq1) ? M1 : ((breq2) ? M2 : IDLE);
 			M1  : next_state = (breq1) ? M1 : SNREADY;
-			SNREADY : next_state = (sready ) ? (breq1) ? M1 : (breq2) ? M2 : IDLE : SNREADY; 
+			SNREADY : next_state = (sready) ? ((breq1) ? M1 : ((breq2) ? M2 : IDLE)) : SNREADY; 
 			M2 : next_state = (breq2) ? M2 : SNREADY;
 			default: next_state = IDLE;
 		endcase
