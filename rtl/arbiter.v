@@ -26,9 +26,9 @@ module arbiter
 	// Next state logic
 	always @(*) begin
 		case (state)
-			IDLE  : next_state = (breq1) ? M1 : (breq2) ? M2 : IDLE;
+			IDLE  : next_state = (breq1) ? M1 : ((breq2) ? M2 : IDLE);
 			M1  : next_state = (breq1) ? M1 : SNREADY;
-			SNREADY : next_state = (sready ) ? (breq1) ? M1 : (breq2) ? M2 : IDLE : SNREADY; 
+			SNREADY : next_state = (sready ) ? ((breq1) ? M1 : ((breq2) ? M2 : IDLE)) : SNREADY; 
 			M2 : next_state = (breq2) ? M2 : SNREADY;
 			default: next_state = IDLE;
 		endcase
@@ -42,6 +42,6 @@ module arbiter
 	// Combinational output assignments
 	assign bgrant1 = (state == M1);
 	assign bgrant2 = (state == M2);
-	assign msel = (state == M2) ? 1'b1 : (state == SNREADY) ? msel : 1'b0;
+	assign msel = (state == M2) ? 1'b1 : 1'b0;
 
 endmodule

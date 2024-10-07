@@ -41,8 +41,8 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 	always @(*) begin
 		case (state)
 			IDLE  : next_state = (mvalid) ? ADDR : IDLE;
-			ADDR  : next_state = (counter == ADDR_WIDTH-1) ? ((smode) ? WDATA : SREADY) : ADDR;
-			SREADY : next_state = (smode) ? IDLE : RDATA; 
+			ADDR  : next_state = (counter == ADDR_WIDTH-1) ? ((mode) ? WDATA : SREADY) : ADDR;
+			SREADY : next_state = (mode) ? IDLE : RDATA; 
 			RDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : RDATA;
 			WDATA : next_state = (counter == DATA_WIDTH-1) ? SREADY : WDATA;
 			default: next_state = IDLE;
@@ -160,7 +160,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 					wdata <= wdata;
 					addr <= addr;
 					counter <= counter;
-					svalid <= mvalid;
+					svalid <= svalid;
 					smemwen <= smemwen;
 					smemren <= smemren;
 				end
