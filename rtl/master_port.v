@@ -1,5 +1,8 @@
-module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
-(
+module master_port #(
+	parameter ADDR_WIDTH = 16, 
+	parameter DATA_WIDTH = 8,
+	parameter SLAVE_MEM_ADDR_WIDTH = 12
+)(
 	input clk, rstn,
 
 	// Signals connecting to master device
@@ -24,8 +27,7 @@ module master_port #(parameter ADDR_WIDTH = 16, DATA_WIDTH = 8)
 	// Acknowledgement from address decoder 
 	input ack
 );
-	localparam SLAVE_DEVICE_ADDR_WIDTH = 4;	// Part of address to identify slave
-	localparam SLAVE_MEM_ADDR_WIDTH = ADDR_WIDTH - SLAVE_DEVICE_ADDR_WIDTH;	// part of address to identify memory address
+	localparam SLAVE_DEVICE_ADDR_WIDTH = ADDR_WIDTH - SLAVE_MEM_ADDR_WIDTH;	// Part of address to identify slave
 
 	/* Internal signals */
 
