@@ -30,6 +30,11 @@ module arbiter
 			bgrant1 <= 1'b0;
 			bgrant2 <= 1'b1;
 		end
+		else if (!breq1 || !breq2) begin
+			msel <= msel;
+			bgrant1 <= (breq1) ? bgrant1 : 1'b0;
+			bgrant2 <= (breq2) ? bgrant2 : 1'b0;
+		end
 		else begin                  
 			msel <= msel;       // Bus Idle - previous value remains
 			bgrant1 <= bgrant1;
