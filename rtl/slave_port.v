@@ -78,6 +78,8 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 				IDLE : begin
 					counter <= 'b0;
 					svalid <= 0;
+					smemren <= 0;
+					smemwen <= 0;
 					
 					if (mvalid) begin
 						mode <= smode;
