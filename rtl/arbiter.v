@@ -42,6 +42,6 @@ module arbiter
 	// Combinational output assignments
 	assign bgrant1 = (state == M1);
 	assign bgrant2 = (state == M2);
-	assign msel = (state == M2) ? 1'b1 : (state == SNREADY) ? msel : 1'b0;
+	assign msel = (state == M2);
 
 endmodule
