@@ -173,7 +173,7 @@ module master2_slave1_tb;
         #15 rstn = 1; // Release reset after 15 time units
 
         // Repeat the write and read tests 10 times
-        for (i = 0; i < 1; i = i + 1) begin
+        for (i = 0; i < 10; i = i + 1) begin
             // Generate random address and data
             rand_addr1 = $random & 12'hFFF;
             rand_data1 = $random;
@@ -183,7 +183,7 @@ module master2_slave1_tb;
             // Write Operation: Sending data to the bus
             // Do 2 request next to each other from different masters
 
-            wait (d1_ready == 1);
+            wait (d1_ready == 1 && d2_ready == 1 && s_ready == 1);
             @(posedge clk);
             d1_addr = rand_addr1[ADDR_WIDTH-1:0];  // Set address with random value
             d1_wdata = rand_data1[DATA_WIDTH-1:0]; // Write data value
