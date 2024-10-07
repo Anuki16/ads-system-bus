@@ -1,2 +1,5 @@
 system-bus.*
+system-bus/
+quartus/
+*.bak
 *.wcfg
