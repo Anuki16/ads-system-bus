@@ -242,9 +242,9 @@ module master1_slave3_tb;
 
             // Generate random address and data
             rand_addr = $random & 14'h3FFF;
-            if (rand_addr[ADDR_WIDTH-DEVICE_ADDR_WIDTH+:2] == 2'b11) begin
-                rand_addr[ADDR_WIDTH-DEVICE_ADDR_WIDTH+:2] = 2'b10;
-            end
+            // if (rand_addr[ADDR_WIDTH-DEVICE_ADDR_WIDTH+:2] == 2'b11) begin
+            //     rand_addr[ADDR_WIDTH-DEVICE_ADDR_WIDTH+:2] = 2'b10;
+            // end
             slave_id = rand_addr[ADDR_WIDTH-DEVICE_ADDR_WIDTH+:2];
 
             rand_data = $random;
@@ -265,9 +265,12 @@ module master1_slave3_tb;
             if (slave_id == 2'b00)  slave_mem_data = slave1.sm.memory[d1_addr[11:0]];
             else if (slave_id == 2'b01)  slave_mem_data = slave2.sm.memory[d1_addr[11:0]];
             else if (slave_id == 2'b10)  slave_mem_data = slave3.sm.memory[d1_addr[11:0]];
-            else $display("Error: invalid slave address (2'b11)");
+            else begin
+                $display("Error: invalid slave address (2'b11)");
+                slave_mem_data = d1_wdata;
+            end
 
-            if (slave_mem_data != d1_wdata) begin
+            if (slave_id != 2'b11 && slave_mem_data != d1_wdata) begin
                 $display("Write failed at iteration %0d: location %x, expected %x, actual %x", i, d1_addr[11:0], d1_wdata, slave_mem_data);
             end else begin
                 $display("Write successful at iteration %0d", i);
@@ -284,7 +287,7 @@ module master1_slave3_tb;
             wait (d1_ready == 1 && s_ready == 1);
 
             #20;
-            if (d1_wdata != d1_rdata) begin
+            if (slave_id != 2'b11 && d1_wdata != d1_rdata) begin
                 $display("Read failed at iteration %0d: location %x, expected %x, actual %x", i, d1_addr[11:0], d1_wdata, d1_rdata);
             end else begin
                 $display("Read successful at iteration %0d", i);

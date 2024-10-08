@@ -19,6 +19,7 @@ module addr_decoder #(
     reg [DEVICE_ADDR_WIDTH-1:0] slave_addr;
     reg slave_en;       // Enable slave connection
     wire mvalid_out;
+    wire slave_addr_valid;  // Valid slave address
     reg [3:0] counter;
 
     // To give the correct wen signals
@@ -44,7 +45,7 @@ module addr_decoder #(
 		case (state)
 			IDLE    : next_state = (mvalid) ? ADDR : IDLE;
 			ADDR    : next_state = (counter == DEVICE_ADDR_WIDTH-1) ? CONNECT : ADDR;
-			CONNECT : next_state = (mvalid) ? WAIT : CONNECT;  
+			CONNECT : next_state = (slave_addr_valid) ? ((mvalid) ? WAIT : CONNECT) : IDLE;  
             WAIT    : next_state = (!mvalid) ? IDLE : WAIT;
 			default: next_state = IDLE;
 		endcase
@@ -57,7 +58,8 @@ module addr_decoder #(
 
     // Combinational assignments
     assign mvalid_out = mvalid & slave_en;
-    assign ack = (state == CONNECT);
+    assign slave_addr_valid = (slave_addr < 3);
+    assign ack = (state == CONNECT) & slave_addr_valid;     // If address invalid, do not ack
 
     // Sequential output logic
 	always @(posedge clk) begin

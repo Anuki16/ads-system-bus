@@ -28,6 +28,7 @@ module master_port #(
 	input ack
 );
 	localparam SLAVE_DEVICE_ADDR_WIDTH = ADDR_WIDTH - SLAVE_MEM_ADDR_WIDTH;	// Part of address to identify slave
+	localparam TIMEOUT_TIME = 5;
 
 	/* Internal signals */
 
@@ -38,7 +39,7 @@ module master_port #(
 	reg [DATA_WIDTH-1:0] rdata;
 
 	// counters
-	reg [7:0] counter;
+	reg [7:0] counter, timeout;
 
 	// States
     localparam IDLE  = 3'b000,    
@@ -58,7 +59,7 @@ module master_port #(
 			IDLE  : next_state = (dvalid) ? REQ : IDLE;
 			REQ	  : next_state = (mbgrant) ? SADDR : REQ;
 			SADDR : next_state = (counter == SLAVE_DEVICE_ADDR_WIDTH-1) ? WAIT : SADDR;
-			WAIT  : next_state = (ack) ? ADDR : WAIT;
+			WAIT  : next_state = (ack) ? ADDR : ((timeout == TIMEOUT_TIME) ? IDLE : WAIT);
 			ADDR  : next_state = (counter == SLAVE_MEM_ADDR_WIDTH-1) ? ((mode) ? WDATA : RDATA) : ADDR;
 			RDATA : next_state = (svalid && (counter == DATA_WIDTH-1)) ? IDLE : RDATA;
 			WDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : WDATA;
@@ -87,12 +88,14 @@ module master_port #(
 			counter <= 'b0;
 			mvalid <= 0;
 			mwdata <= 0;
+			timeout <= 'b0;
 		end
 		else begin
 			case (state)
 				IDLE : begin
 					counter <= 'b0;
 					mvalid <= 0;
+					timeout <= 'b0;
 
 					if (dvalid) begin	// Have to send data
 						wdata <= dwdata;
@@ -122,6 +125,7 @@ module master_port #(
 
 				WAIT : begin
 					mvalid <= 1'b0;
+					timeout <= timeout + 1;
 				end
 
 				ADDR : begin	// Send slave mem address
@@ -171,6 +175,7 @@ module master_port #(
 					counter <= counter;
 					mvalid <= mvalid;
 					mwdata <= mwdata;
+					timeout <= timeout;
 				end
 			endcase
 		end
