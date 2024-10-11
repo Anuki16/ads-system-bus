@@ -1,4 +1,4 @@
-module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
+module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0, MEM_SIZE = 4096)
 (
     input clk, rstn,
     // Signals connecting to serial bus
@@ -7,7 +7,8 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 	input smode,	// 0 -  read, 1 - write, from master
 	input mvalid,	// wdata valid - (recieving data and address from master)
 	output svalid,	// rdata valid - (sending data from slave)
-    output sready //slave is ready for transaction
+    output sready, //slave is ready for transaction
+    output ssplit
 );
 
 	wire [DATA_WIDTH-1:0] smemrdata;
@@ -19,7 +20,8 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 
     slave_port #(
         .ADDR_WIDTH(ADDR_WIDTH),
-        .DATA_WIDTH(DATA_WIDTH)
+        .DATA_WIDTH(DATA_WIDTH),
+        .SPLIT_EN(SPLIT_EN)
     )sp(
         .clk(clk), 
         .rstn(rstn),
@@ -33,13 +35,15 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
         .smode(smode),
         .mvalid(mvalid),	
         .svalid(svalid),	
-        .sready(sready)
+        .sready(sready),
+        .ssplit(ssplit)
     );
 
 
     slave_memory #(
         .ADDR_WIDTH(ADDR_WIDTH),
-        .DATA_WIDTH(DATA_WIDTH)
+        .DATA_WIDTH(DATA_WIDTH),
+        .MEM_SIZE(MEM_SIZE)
     )sm(
         .clk(clk), 
         .rstn(rstn), 
