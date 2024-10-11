@@ -23,6 +23,7 @@ module master_port #(
 	// Signals to arbiter
 	output mbreq,
 	input mbgrant,
+	input msplit,
 
 	// Acknowledgement from address decoder 
 	input ack
@@ -48,7 +49,8 @@ module master_port #(
 			   WDATA = 3'b011,	// Write data to slave
 			   REQ 	 = 3'b100,	// Request bus access
 			   SADDR = 3'b101,
-			   WAIT  = 3'b110;	// Send slave device address
+			   WAIT  = 3'b110,  // Send slave device address
+			   SPLIT = 3'b111;	// Wait for split slave to be ready
 
 	// State variables
 	reg [2:0] state, next_state;
@@ -61,8 +63,9 @@ module master_port #(
 			SADDR : next_state = (counter == SLAVE_DEVICE_ADDR_WIDTH-1) ? WAIT : SADDR;
 			WAIT  : next_state = (ack) ? ADDR : ((timeout == TIMEOUT_TIME) ? IDLE : WAIT);
 			ADDR  : next_state = (counter == SLAVE_MEM_ADDR_WIDTH-1) ? ((mode) ? WDATA : RDATA) : ADDR;
-			RDATA : next_state = (svalid && (counter == DATA_WIDTH-1)) ? IDLE : RDATA;
+			RDATA : next_state = (msplit) ? SPLIT : ((svalid && (counter == DATA_WIDTH-1)) ? IDLE : RDATA);
 			WDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : WDATA;
+			SPLIT : next_state = (!msplit) ? RDATA : SPLIT;
 			default: next_state = IDLE;
 		endcase
 	end
@@ -165,6 +168,10 @@ module master_port #(
 					end else begin
 						counter <= counter + 1;
 					end
+				end
+
+				SPLIT : begin
+					mvalid <= 1'b0;
 				end
 
 				default: begin
