@@ -6,6 +6,7 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0, MEM_SIZE
 	output srdata,	// read data to the master
 	input smode,	// 0 -  read, 1 - write, from master
 	input mvalid,	// wdata valid - (recieving data and address from master)
+    input split_grant, // grant bus access in split
 	output svalid,	// rdata valid - (sending data from slave)
     output sready, //slave is ready for transaction
     output ssplit
@@ -34,6 +35,7 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0, MEM_SIZE
         .srdata(srdata),
         .smode(smode),
         .mvalid(mvalid),	
+        .split_grant(split_grant),
         .svalid(svalid),	
         .sready(sready),
         .ssplit(ssplit)

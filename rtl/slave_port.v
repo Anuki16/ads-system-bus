@@ -14,6 +14,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 	output reg srdata,	// read data to the master
 	input smode,	// 0 -  read, 1 - write, from master
 	input mvalid,	// wdata valid - (recieving data and address from master)
+	input split_grant, //grant to send read data
 	output reg svalid,	// rdata valid - (sending data from slave)
 	output sready, //slave is ready for transaction
 	output ssplit // 1 - split
@@ -50,7 +51,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 			IDLE  : next_state = (mvalid) ? ADDR : IDLE;
 			ADDR  : next_state = (counter == ADDR_WIDTH-1) ? ((mode) ? WDATA : SREADY) : ADDR;
 			SREADY : next_state = (mode) ? IDLE : ((SPLIT_EN) ? SPLIT : RDATA);
-			SPLIT : next_state = (rcounter == LATENCY) ? RDATA : SPLIT;
+			SPLIT : next_state = (rcounter == LATENCY) ? ((split_grant) ? RDATA : SPLIT) : SPLIT;
 			RDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : RDATA;
 			WDATA : next_state = (counter == DATA_WIDTH-1) ? SREADY : WDATA;
 			default: next_state = IDLE;
@@ -136,7 +137,11 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 				end
 			
 				SPLIT : begin //wait for sometime
-					rcounter <= rcounter + 1;
+					if (rcounter == LATENCY) begin 
+						rcounter <= rcounter;
+					end else begin
+						rcounter <= rcounter + 1;
+					end
 				end
 
 				RDATA : begin	// Send data to master
