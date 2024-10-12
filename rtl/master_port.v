@@ -65,7 +65,7 @@ module master_port #(
 			ADDR  : next_state = (counter == SLAVE_MEM_ADDR_WIDTH-1) ? ((mode) ? WDATA : RDATA) : ADDR;
 			RDATA : next_state = (msplit) ? SPLIT : ((svalid && (counter == DATA_WIDTH-1)) ? IDLE : RDATA);
 			WDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : WDATA;
-			SPLIT : next_state = (!msplit) ? RDATA : SPLIT;
+			SPLIT : next_state = (!msplit && mbgrant) ? RDATA : SPLIT;
 			default: next_state = IDLE;
 		endcase
 	end
