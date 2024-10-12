@@ -82,6 +82,8 @@ module top_tb;
 
         #15 rstn = 1; // Release reset after 15 time units
 
+        // Slave 1 is the 2K slave
+
         // Repeat the write and read tests 10 times
         for (i = 0; i < 10; i = i + 1) begin
 
@@ -121,7 +123,7 @@ module top_tb;
 
             #20;
 
-            if (slave_id1 == 2'b00)  slave_mem_data1 = dut.slave1.sm.memory[d1_addr[11:0]];
+            if (slave_id1 == 2'b00)  slave_mem_data1 = dut.slave1.sm.memory[d1_addr[10:0]];
             else if (slave_id1 == 2'b01)  slave_mem_data1 = dut.slave2.sm.memory[d1_addr[11:0]];
             else if (slave_id1 == 2'b10)  slave_mem_data1 = dut.slave3.sm.memory[d1_addr[11:0]];
 
@@ -132,7 +134,7 @@ module top_tb;
                 $display("Master 1 write successful at iteration %0d", i);
             end
 
-            if (slave_id2 == 2'b00)  slave_mem_data2 = dut.slave1.sm.memory[d2_addr[11:0]];
+            if (slave_id2 == 2'b00)  slave_mem_data2 = dut.slave1.sm.memory[d2_addr[10:0]];
             else if (slave_id2 == 2'b01)  slave_mem_data2 = dut.slave2.sm.memory[d2_addr[11:0]];
             else if (slave_id2 == 2'b10)  slave_mem_data2 = dut.slave3.sm.memory[d2_addr[11:0]];
 
@@ -195,7 +197,7 @@ module top_tb;
 
             #20;
 
-            if (slave_id1 == 2'b00)  slave_mem_data1 = dut.slave1.sm.memory[d2_addr[11:0]];
+            if (slave_id1 == 2'b00)  slave_mem_data1 = dut.slave1.sm.memory[d2_addr[10:0]];
             else if (slave_id1 == 2'b01)  slave_mem_data1 = dut.slave2.sm.memory[d2_addr[11:0]];
             else if (slave_id1 == 2'b10)  slave_mem_data1 = dut.slave3.sm.memory[d2_addr[11:0]];
 

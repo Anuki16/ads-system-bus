@@ -111,7 +111,8 @@ module top #(
     // Initialize slave
     slave #(
         .ADDR_WIDTH(SLAVE_MEM_ADDR_WIDTH),
-        .DATA_WIDTH(DATA_WIDTH)
+        .DATA_WIDTH(DATA_WIDTH),
+        .MEM_SIZE(2048)
     ) slave1 (
         .clk(clk),
         .rstn(rstn),
@@ -125,7 +126,8 @@ module top #(
 
     slave #(
         .ADDR_WIDTH(SLAVE_MEM_ADDR_WIDTH),
-        .DATA_WIDTH(DATA_WIDTH)
+        .DATA_WIDTH(DATA_WIDTH),
+        .MEM_SIZE(4096)
     ) slave2 (
         .clk(clk),
         .rstn(rstn),
@@ -139,7 +141,8 @@ module top #(
 
     slave #(
         .ADDR_WIDTH(SLAVE_MEM_ADDR_WIDTH),
-        .DATA_WIDTH(DATA_WIDTH)
+        .DATA_WIDTH(DATA_WIDTH),
+        .MEM_SIZE(4096)
     ) slave3 (
         .clk(clk),
         .rstn(rstn),
