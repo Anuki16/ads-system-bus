@@ -1,4 +1,4 @@
-module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
+module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, MEM_SIZE = 4096)
 (
     input clk, rstn,
     // Signals connecting to serial bus
@@ -39,7 +39,8 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 
     slave_memory #(
         .ADDR_WIDTH(ADDR_WIDTH),
-        .DATA_WIDTH(DATA_WIDTH)
+        .DATA_WIDTH(DATA_WIDTH),
+        .MEM_SIZE(MEM_SIZE)
     )sm(
         .clk(clk), 
         .rstn(rstn), 
