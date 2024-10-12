@@ -1,4 +1,4 @@
-module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
+module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 (
 	input clk, rstn,
 
@@ -15,7 +15,8 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 	input smode,	// 0 -  read, 1 - write, from master
 	input mvalid,	// wdata valid - (recieving data and address from master)
 	output reg svalid,	// rdata valid - (sending data from slave)
-	output sready //slave is ready for transaction
+	output sready, //slave is ready for transaction
+	output ssplit // 1 - split
 );
 
 	/* Internal signals */
@@ -28,12 +29,18 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 	// counters
 	reg [7:0] counter;
 
+	localparam LATENCY = 4;
+	reg [LATENCY-1:0] rcounter;
+
 	// States
     localparam IDLE  = 3'b000,    //0
                ADDR  = 3'b001, 	// Receive address from slave //1
                RDATA = 3'b010,    // Send data to master //2
 			   WDATA = 3'b011,	// Receive data from master //3
-			   SREADY = 3'b101; //5
+			   SREADY = 3'b101, //5
+			   SPLIT = 3'b100; // 4
+
+	
 	// State variables
 	reg [2:0] state, next_state;
 
@@ -42,7 +49,8 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 		case (state)
 			IDLE  : next_state = (mvalid) ? ADDR : IDLE;
 			ADDR  : next_state = (counter == ADDR_WIDTH-1) ? ((mode) ? WDATA : SREADY) : ADDR;
-			SREADY : next_state = (mode) ? IDLE : RDATA; 
+			SREADY : next_state = (mode) ? IDLE : ((SPLIT_EN) ? SPLIT : RDATA);
+			SPLIT : next_state = (rcounter == LATENCY) ? RDATA : SPLIT;
 			RDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : RDATA;
 			WDATA : next_state = (counter == DATA_WIDTH-1) ? SREADY : WDATA;
 			default: next_state = IDLE;
@@ -57,6 +65,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 	// Combinational output assignments
 	assign rdata =	smemrdata;
 	assign sready = (state == IDLE);
+	assign ssplit = (state == SPLIT);
 
 	// Sequential output logic
 	always @(posedge clk) begin
@@ -125,8 +134,12 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 					end	
 				end
 			
-				RDATA : begin	// Send data to master
+				SPLIT : begin //wait for sometime
+					rcounter <= rcounter + 1;
+				end
 
+				RDATA : begin	// Send data to master
+					rcounter <= 'b0;
 					srdata <= rdata[counter];
 					svalid <= 1'b1;
 

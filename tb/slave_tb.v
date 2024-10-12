@@ -5,6 +5,7 @@ module slave_tb;
     // Parameters
     parameter ADDR_WIDTH = 12;
     parameter DATA_WIDTH = 8;
+    parameter SLAVE_EN = 1;
 
     // Testbench signals
     reg clk;
@@ -18,7 +19,8 @@ module slave_tb;
     // Slave module instantiation
     slave #(
         .ADDR_WIDTH(ADDR_WIDTH),
-        .DATA_WIDTH(DATA_WIDTH)
+        .DATA_WIDTH(DATA_WIDTH),
+        .SLAVE_EN(SLAVE_EN)
     ) uut (
         .clk(clk),
         .rstn(rstn),
@@ -27,7 +29,8 @@ module slave_tb;
         .smode(smode),
         .mvalid(mvalid),
         .svalid(svalid),
-        .sready(sready)
+        .sready(sready),
+        .ssplit(ssplit)
     );
 
     // Clock generation
