@@ -7,6 +7,8 @@ module addr_decoder #(
 
     input mwdata,       // write data bus
     input mvalid,            // valid from master
+    input ssplit,       // split signal from slave
+    input split_grant,      // signal from arbiter ending split
 
     // valid signals going to slaves
     output mvalid1, mvalid2, mvalid3,
@@ -21,6 +23,7 @@ module addr_decoder #(
     wire mvalid_out;
     wire slave_addr_valid;  // Valid slave address
     reg [3:0] counter;
+    reg [DEVICE_ADDR_WIDTH-1:0] split_slave_addr;
 
     // To give the correct wen signals
     dec3 mvalid_decoder (

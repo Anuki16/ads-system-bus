@@ -2,7 +2,7 @@ module arbiter
 (
 	input clk, rstn,
 	input breq1, breq2,  //bus requests from 2 masters
-	input sready1, sready2, sready3,   //slave ready
+	input sready1, sready2, sreadysp,   //slave ready, sreadysp = split supported slave
 	input ssplit,			// slave split
 	
 	output bgrant1, bgrant2,  //bus grant signals for 2 masters
@@ -13,10 +13,11 @@ module arbiter
 	
 	//priority based: high priority for master 1 - breq1
 
-	wire sready;
+	wire sready, sready_nsplit;
 	reg [1:0] split_owner;
 
-	assign sready = sready1 & sready2 & sready3;
+	assign sready = sready1 & sready2 & sreadysp;
+	assign sready_nsplit = sready1 & sready2;		// not split slaves are ready
 
 	// Split owner encoding
 	localparam NONE = 2'b00,
@@ -34,9 +35,22 @@ module arbiter
 	// Next state logic
 	always @(*) begin
 		case (state)
-			IDLE  : next_state = (breq1 & sready) ? M1 : ((breq2 & sready) ? M2 : IDLE);
-			M1  : next_state = (breq1) ? M1 : IDLE;
-			M2 : next_state = (breq2) ? M2 : IDLE;
+			IDLE  : begin
+				if (!ssplit) begin	// either split was released or no split was there
+					if (split_owner == SM1) next_state = M1;
+					else if (breq1 & sready) next_state = M1;
+					else if (split_owner == SM2) next_state = M2;
+					else if (breq2 & sready) next_state = M2;
+					else next_state = IDLE;
+				end
+				else begin		// One master is waiting for a split transaction, other master can continue
+					if ((split_owner == SM1) && breq2 && sready_nsplit) next_state = M2;
+					else if ((split_owner == SM2) && breq1 && sready_nsplit) next_state = M1;
+					else next_state = IDLE;
+				end
+			end 
+			M1  : next_state = (!breq1 | ssplit) ? IDLE : M1;
+			M2 : next_state = (!breq2 | ssplit) ? IDLE : M2;
 			default: next_state = IDLE;
 		endcase
 	end
@@ -57,24 +71,20 @@ module arbiter
 			msplit1 <= 1'b0;
 			msplit2 <= 1'b0;
 			split_owner <= NONE;
+			split_grant <= 1'b0;
 		end
 		else begin
 			case (state)
-				// IDLE : begin
-				// 	if (split_owner != NONE && !ssplit) begin
-				// 		split_grant <= 1'b1;
-				// 	end else begin
-				// 		split_grant <= split_grant;
-				// 	end
-				// end
 
 				M1 : begin
 					if (ssplit) begin
 						msplit1 <= 1'b1;
 						split_owner <= SM1;
+						split_grant <= 1'b0;
 					end else begin
 						msplit1 <= 1'b0;
 						split_owner <= NONE;
+						split_grant <= (split_owner == SM1);
 					end
 				end
 
@@ -82,9 +92,11 @@ module arbiter
 					if (ssplit) begin
 						msplit2 <= 1'b1;
 						split_owner <= SM2;
+						split_grant <= 1'b0;
 					end else begin
 						msplit2 <= 1'b0;
 						split_owner <= NONE;
+						split_grant <= (split_owner == SM2);
 					end
 				end
 
@@ -92,6 +104,7 @@ module arbiter
 					msplit1 <= msplit1;
 					msplit2 <= msplit2;
 					split_owner <= split_owner;
+					split_grant <= split_grant;
 				end
 			endcase
 		end
