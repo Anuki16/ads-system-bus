@@ -49,8 +49,8 @@ module arbiter
 					else next_state = IDLE;
 				end
 			end 
-			M1  : next_state = (!breq1 | ssplit) ? IDLE : M1;
-			M2 : next_state = (!breq2 | ssplit) ? IDLE : M2;
+			M1  : next_state = (!breq1 | (split_owner == NONE && ssplit)) ? IDLE : M1;
+			M2 : next_state = (!breq2 | (split_owner == NONE && ssplit)) ? IDLE : M2;
 			default: next_state = IDLE;
 		endcase
 	end
@@ -77,26 +77,34 @@ module arbiter
 			case (state)
 
 				M1 : begin
-					if (ssplit) begin
+					if (split_owner == NONE && ssplit) begin
 						msplit1 <= 1'b1;
 						split_owner <= SM1;
 						split_grant <= 1'b0;
-					end else begin
+					end else if (split_owner == SM1 && !ssplit) begin
 						msplit1 <= 1'b0;
 						split_owner <= NONE;
-						split_grant <= (split_owner == SM1);
+						split_grant <= 1'b1;
+					end else begin
+						msplit1 <= msplit1;
+						split_owner <= split_owner;
+						split_grant <= 1'b0;
 					end
 				end
 
 				M2 : begin
-					if (ssplit) begin
+					if (split_owner == NONE && ssplit) begin
 						msplit2 <= 1'b1;
 						split_owner <= SM2;
 						split_grant <= 1'b0;
-					end else begin
+					end else if (split_owner == SM2 && !ssplit) begin
 						msplit2 <= 1'b0;
 						split_owner <= NONE;
-						split_grant <= (split_owner == SM2);
+						split_grant <= 1'b1;
+					end else begin
+						msplit2 <= msplit2;
+						split_owner <= split_owner;
+						split_grant <= 1'b0;
 					end
 				end
 

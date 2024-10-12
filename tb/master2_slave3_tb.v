@@ -67,6 +67,8 @@ module master2_slave3_tb;
     wire        s3_ready;
     wire        s3_split;
 
+    wire        split_grant;
+
     // Instantiate masters
     master_port #(
         .ADDR_WIDTH(ADDR_WIDTH),
@@ -129,7 +131,8 @@ module master2_slave3_tb;
         .svalid(s1_svalid),
         .mvalid(s1_mvalid),
         .sready(s1_ready),
-        .ssplit()
+        .ssplit(),
+        .split_grant(0)
     );
 
     slave #(
@@ -144,7 +147,8 @@ module master2_slave3_tb;
         .svalid(s2_svalid),
         .mvalid(s2_mvalid),
         .sready(s2_ready),
-        .ssplit()
+        .ssplit(),
+        .split_grant(0)
     );
 
     slave #(
@@ -160,7 +164,8 @@ module master2_slave3_tb;
         .svalid(s3_svalid),
         .mvalid(s3_mvalid),
         .sready(s3_ready),
-        .ssplit(s3_split)
+        .ssplit(s3_split),
+        .split_grant(split_grant)
     );
 
     // Bus
@@ -217,7 +222,7 @@ module master2_slave3_tb;
         .s3_ready(s3_ready),
         .s3_split(s3_split),
 
-        .split_grant()
+        .split_grant(split_grant)
     );
 
     wire s_ready;
@@ -261,7 +266,7 @@ module master2_slave3_tb;
         #15 rstn = 1; // Release reset after 15 time units
 
         // Repeat the write and read tests 10 times
-        for (i = 0; i < 3; i = i + 1) begin
+        for (i = 0; i < 20; i = i + 1) begin
 
             // Generate random address and data
             rand_addr1 = $random & 14'h3FFF;
@@ -304,10 +309,10 @@ module master2_slave3_tb;
             else if (slave_id1 == 2'b10)  slave_mem_data1 = slave3.sm.memory[d1_addr[11:0]];
 
             if (slave_id1 != 2'b11 && slave_mem_data1 != d1_wdata) begin
-                $display("Master 1 write failed at iteration %0d: location %x, expected %x, actual %x", 
-                            i, d1_addr[11:0], d1_wdata, slave_mem_data1);
+                $display("Master 1 write failed at iteration %0d: location %0x, expected %x, actual %x", 
+                            i, d1_addr, d1_wdata, slave_mem_data1);
             end else begin
-                $display("Master 1 write successful at iteration %0d", i);
+                $display("Master 1 write to %0x successful at iteration %0d", d1_addr, i);
             end
 
             if (slave_id2 == 2'b00)  slave_mem_data2 = slave1.sm.memory[d2_addr[11:0]];
@@ -316,10 +321,10 @@ module master2_slave3_tb;
 
 
             if (slave_id2 != 2'b11 && slave_mem_data2 != d2_wdata) begin
-                $display("Master 2 write failed at iteration %0d: location %x, expected %x, actual %x", 
-                            i, d2_addr[11:0], d2_wdata, slave_mem_data2);
+                $display("Master 2 write failed at iteration %0d: location %0x, expected %x, actual %x", 
+                            i, d2_addr, d2_wdata, slave_mem_data2);
             end else begin
-                $display("Master 2 write successful at iteration %0d", i);
+                $display("Master 2 write to %0x successful at iteration %0d", d2_addr, i);
             end
 
             // Read operation: make both requests on the same clock cycle
@@ -337,17 +342,17 @@ module master2_slave3_tb;
             #20;
 
             if (slave_id1 != 2'b11 && d1_wdata != d1_rdata) begin
-                $display("Master 1 read failed at iteration %0d: location %x, expected %x, actual %x", 
-                            i, d1_addr[11:0], d1_wdata, d1_rdata);
+                $display("Master 1 read failed at iteration %0d: location %0x, expected %x, actual %x", 
+                            i, d1_addr, d1_wdata, d1_rdata);
             end else begin
-                $display("Master 1 read successful at iteration %0d", i);
+                $display("Master 1 read from %0x successful at iteration %0d", d1_addr, i);
             end
 
             if (slave_id2 != 2'b11 && d2_wdata != d2_rdata) begin
-                $display("Master 2 read failed at iteration %0d: location %x, expected %x, actual %x", 
-                            i, d2_addr[11:0], d2_wdata, d2_rdata);
+                $display("Master 2 read failed at iteration %0d: location %0x, expected %x, actual %x", 
+                            i, d2_addr, d2_wdata, d2_rdata);
             end else begin
-                $display("Master 2 read successful at iteration %0d", i);
+                $display("Master 2 read from %0x successful at iteration %0d", d2_addr, i);
             end
 
             // Master 2 write and master 1 read
@@ -378,17 +383,17 @@ module master2_slave3_tb;
             else if (slave_id1 == 2'b10)  slave_mem_data1 = slave3.sm.memory[d2_addr[11:0]];
 
             if (slave_id1 != 2'b11 && slave_mem_data1 != d2_wdata) begin
-                $display("Master 2 write failed at iteration %0d: location %x, expected %x, actual %x", 
-                            i, d2_addr[11:0], d2_wdata, slave_mem_data1);
+                $display("Master 2 write failed at iteration %0d: location %0x, expected %x, actual %x", 
+                            i, d2_addr, d2_wdata, slave_mem_data1);
             end else begin
-                $display("Master 2 write successful at iteration %0d", i);
+                $display("Master 2 write to %0x successful at iteration %0d", d2_addr, i);
             end
 
             if (slave_id1 != 2'b11 && d2_wdata != d1_rdata) begin
-                $display("Master 1 read failed at iteration %0d: location %x, expected %x, actual %x", 
-                            i, d1_addr[11:0], d2_wdata, d1_rdata);
+                $display("Master 1 read failed at iteration %0d: location %0x, expected %x, actual %x", 
+                            i, d1_addr, d2_wdata, d1_rdata);
             end else begin
-                $display("Master 1 read successful at iteration %0d", i);
+                $display("Master 1 read from %0x successful at iteration %0d", d1_addr, i);
             end
 
             // Small delay before next iteration

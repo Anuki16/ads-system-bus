@@ -76,6 +76,7 @@ module addr_decoder #(
             slave_en <= 0;
             counter <= 'b0;
             ssel <= 'b0;
+            split_slave_addr <= 'b0;
 		end
 		else begin
 			case (state)
@@ -125,6 +126,7 @@ module addr_decoder #(
                     slave_en <= slave_en;
                     counter <= counter;
                     ssel <= ssel;
+                    split_slave_addr <= split_slave_addr;
 				end
 			endcase
 		end
