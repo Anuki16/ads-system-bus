@@ -17,8 +17,7 @@ module arbiter
 	// States
     localparam IDLE  = 3'b000,    //0
                M1  = 3'b001, 	// M1 uses bus//1
-               SNREADY = 3'b010,    // Master done slave not ready yet //2
-			   M2 = 3'b011;	// M2 uses bu3 //3
+			   M2 = 3'b010;	// M2 uses bu3 //3
 
 	// State variables
 	reg [2:0] state, next_state;
@@ -26,10 +25,9 @@ module arbiter
 	// Next state logic
 	always @(*) begin
 		case (state)
-			IDLE  : next_state = (breq1) ? M1 : ((breq2) ? M2 : IDLE);
-			M1  : next_state = (breq1) ? M1 : SNREADY;
-			SNREADY : next_state = (sready) ? ((breq1) ? M1 : ((breq2) ? M2 : IDLE)) : SNREADY; 
-			M2 : next_state = (breq2) ? M2 : SNREADY;
+			IDLE  : next_state = (breq1 & sready) ? M1 : ((breq2 & sready) ? M2 : IDLE);
+			M1  : next_state = (breq1) ? M1 : IDLE;
+			M2 : next_state = (breq2) ? M2 : IDLE;
 			default: next_state = IDLE;
 		endcase
 	end
