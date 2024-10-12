@@ -39,7 +39,8 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
                RDATA = 3'b010,    // Send data to master //2
 			   WDATA = 3'b011,	// Receive data from master //3
 			   SREADY = 3'b101, //5
-			   SPLIT = 3'b100; // 4
+			   SPLIT = 3'b100, // 4
+			   WAIT = 3'b110; //6
 
 	
 	// State variables
@@ -51,7 +52,8 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 			IDLE  : next_state = (mvalid) ? ADDR : IDLE;
 			ADDR  : next_state = (counter == ADDR_WIDTH-1) ? ((mode) ? WDATA : SREADY) : ADDR;
 			SREADY : next_state = (mode) ? IDLE : ((SPLIT_EN) ? SPLIT : RDATA);
-			SPLIT : next_state = (rcounter == LATENCY) ? ((split_grant) ? RDATA : SPLIT) : SPLIT;
+			SPLIT : next_state = (rcounter == LATENCY) ? WAIT : SPLIT;
+			WAIT : next_state = (split_grant) ? RDATA : WAIT;
 			RDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : RDATA;
 			WDATA : next_state = (counter == DATA_WIDTH-1) ? SREADY : WDATA;
 			default: next_state = IDLE;
@@ -137,15 +139,14 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 				end
 			
 				SPLIT : begin //wait for sometime
-					if (rcounter == LATENCY) begin 
-						rcounter <= rcounter;
-					end else begin
-						rcounter <= rcounter + 1;
-					end
+					rcounter <= rcounter + 1;
+				end
+
+				WAIT : begin //wait until grant bus access for split transfer
+					rcounter <= 'b0;
 				end
 
 				RDATA : begin	// Send data to master
-					rcounter <= 'b0;
 					srdata <= rdata[counter];
 					svalid <= 1'b1;
 
