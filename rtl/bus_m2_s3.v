@@ -15,6 +15,7 @@ module bus_m2_s3 #(
 	input         m1_breq,
 	output        m1_bgrant,
     output        m1_ack,
+    output        m1_split,
 
     // Master 2
     output        m2_rdata,	// read data
@@ -25,6 +26,7 @@ module bus_m2_s3 #(
 	input         m2_breq,
 	output        m2_bgrant,
     output        m2_ack,
+    output        m2_split,
 
     // Slave 1
     input         s1_rdata,	// read data
@@ -48,7 +50,10 @@ module bus_m2_s3 #(
 	output        s3_mode,	// 0 -  read, 1 - write
 	output        s3_mvalid,	// wdata valid
 	input         s3_svalid,	// rdata valid
-    input         s3_ready
+    input         s3_ready,
+    input         s3_split,      // s3 is the split slave
+
+    output        split_grant
 );
     localparam DEVICE_ADDR_WIDTH = ADDR_WIDTH - SLAVE_MEM_ADDR_WIDTH;
 
@@ -57,7 +62,7 @@ module bus_m2_s3 #(
     wire m_wdata, m_mode, m_mvalid;       // master muxed signals
     wire [1:0] s_select;      // Slave select for read mux
     wire m_ack;         // Acknowledgement from addr decoder
-    wire s_rdata, s_svalid;
+    wire s_rdata, s_svalid, s_split;
 
     // Instantiate modules in bus
 
@@ -72,7 +77,11 @@ module bus_m2_s3 #(
         .msel(m_select),
         .sready1(s1_ready),
         .sready2(s2_ready),
-        .sready3(s3_ready)
+        .sreadysp(s3_ready),
+        .ssplit(s_split),
+        .msplit1(m1_split),
+        .msplit2(m2_split),
+        .split_grant(split_grant)
     );
 
     // Address decoder
@@ -91,7 +100,9 @@ module bus_m2_s3 #(
         .sready2(s2_ready),
         .sready3(s3_ready),
         .ssel(s_select),
-        .ack(m_ack)
+        .ack(m_ack),
+        .ssplit(s_split),
+        .split_grant(split_grant)
     );
 
     // Write data mux
@@ -146,5 +157,7 @@ module bus_m2_s3 #(
 
     assign m1_ack = m_ack;
     assign m2_ack = m_ack;
+
+    assign s_split = s3_split;
 
 endmodule

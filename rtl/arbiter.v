@@ -8,7 +8,7 @@ module arbiter
 	output bgrant1, bgrant2,  //bus grant signals for 2 masters
 	output msel, //master select; 0 - master 1, 1 - master 2
 	output reg msplit1, msplit2,		// Split signals given to master
-	output split_grant			// grant access to continue split transaction (send back to slave)
+	output reg split_grant			// grant access to continue split transaction (send back to slave)
 );
 	
 	//priority based: high priority for master 1 - breq1

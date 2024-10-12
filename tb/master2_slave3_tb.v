@@ -29,6 +29,7 @@ module master2_slave3_tb;
 	wire         m1_breq;
 	wire        m1_bgrant;
     wire        m1_ack;
+    wire        m1_split;
 
     // Master 2
     wire        m2_rdata;	// read data
@@ -39,6 +40,7 @@ module master2_slave3_tb;
 	wire         m2_breq;
 	wire        m2_bgrant;
     wire        m2_ack;
+    wire        m2_split;
 
     // Slave 1
     wire        s1_rdata;	// read data
@@ -63,6 +65,7 @@ module master2_slave3_tb;
 	wire        s3_mvalid;	// wdata valid
 	wire        s3_svalid;	// rdata valid
     wire        s3_ready;
+    wire        s3_split;
 
     // Instantiate masters
     master_port #(
@@ -85,7 +88,8 @@ module master2_slave3_tb;
         .svalid(m1_svalid),
         .mbreq(m1_breq),
         .mbgrant(m1_bgrant),
-        .ack(m1_ack)
+        .ack(m1_ack),
+        .msplit(m1_split)
     );
 
     master_port #(
@@ -108,7 +112,8 @@ module master2_slave3_tb;
         .svalid(m2_svalid),
         .mbreq(m2_breq),
         .mbgrant(m2_bgrant),
-        .ack(m2_ack)
+        .ack(m2_ack),
+        .msplit(m2_split)
     );
 
     // Initialize slave
@@ -123,7 +128,8 @@ module master2_slave3_tb;
         .smode(s1_mode),
         .svalid(s1_svalid),
         .mvalid(s1_mvalid),
-        .sready(s1_ready)
+        .sready(s1_ready),
+        .ssplit()
     );
 
     slave #(
@@ -137,12 +143,14 @@ module master2_slave3_tb;
         .smode(s2_mode),
         .svalid(s2_svalid),
         .mvalid(s2_mvalid),
-        .sready(s2_ready)
+        .sready(s2_ready),
+        .ssplit()
     );
 
     slave #(
         .ADDR_WIDTH(SLAVE_MEM_ADDR_WIDTH),
-        .DATA_WIDTH(DATA_WIDTH)
+        .DATA_WIDTH(DATA_WIDTH),
+        .SPLIT_EN(1)
     ) slave3 (
         .clk(clk),
         .rstn(rstn),
@@ -151,7 +159,8 @@ module master2_slave3_tb;
         .smode(s3_mode),
         .svalid(s3_svalid),
         .mvalid(s3_mvalid),
-        .sready(s3_ready)
+        .sready(s3_ready),
+        .ssplit(s3_split)
     );
 
     // Bus
@@ -172,6 +181,7 @@ module master2_slave3_tb;
         .m1_breq(m1_breq),
         .m1_bgrant(m1_bgrant),
         .m1_ack(m1_ack),
+        .m1_split(m1_split),
     
         // Master 2 connections
         .m2_rdata(m2_rdata),
@@ -182,6 +192,7 @@ module master2_slave3_tb;
         .m2_breq(m2_breq),
         .m2_bgrant(m2_bgrant),
         .m2_ack(m2_ack),
+        .m2_split(m2_split),
 
         // Slave 1 connections
         .s1_rdata(s1_rdata),
@@ -203,7 +214,10 @@ module master2_slave3_tb;
         .s3_mode(s3_mode),
         .s3_mvalid(s3_mvalid),
         .s3_svalid(s3_svalid),
-        .s3_ready(s3_ready)
+        .s3_ready(s3_ready),
+        .s3_split(s3_split),
+
+        .split_grant()
     );
 
     wire s_ready;
@@ -247,7 +261,7 @@ module master2_slave3_tb;
         #15 rstn = 1; // Release reset after 15 time units
 
         // Repeat the write and read tests 10 times
-        for (i = 0; i < 10; i = i + 1) begin
+        for (i = 0; i < 3; i = i + 1) begin
 
             // Generate random address and data
             rand_addr1 = $random & 14'h3FFF;

@@ -80,6 +80,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 			smemaddr <= 0;
 			smemwdata <= 0;
 			srdata <= 0;
+			rcounter <= 'b0;
 		end
 		else begin
 			case (state)
@@ -176,6 +177,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 					svalid <= svalid;
 					smemwen <= smemwen;
 					smemren <= smemren;
+					rcounter <= rcounter;
 				end
 				
 			endcase

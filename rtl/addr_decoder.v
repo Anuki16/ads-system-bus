@@ -25,7 +25,7 @@ module addr_decoder #(
     reg slave_en;       // Enable slave connection
     wire mvalid_out;
     wire slave_addr_valid;  // Valid slave address
-    wire sready;
+    wire [2:0] sready;
     reg [3:0] counter;
     reg [DEVICE_ADDR_WIDTH-1:0] split_slave_addr;
 
@@ -50,10 +50,10 @@ module addr_decoder #(
     // Next state logic
 	always @(*) begin
 		case (state)
-			IDLE    : next_state = (mvalid) ? ADDR : IDLE;
+			IDLE    : next_state = (mvalid) ? ADDR : ((split_grant) ? WAIT : IDLE);
 			ADDR    : next_state = (counter == DEVICE_ADDR_WIDTH-1) ? CONNECT : ADDR;
 			CONNECT : next_state = (slave_addr_valid) ? ((mvalid) ? WAIT : CONNECT) : IDLE;  
-            WAIT    : next_state = (sready) ? IDLE : WAIT;
+            WAIT    : next_state = (sready[slave_addr] | ssplit) ? IDLE : WAIT;
 			default: next_state = IDLE;
 		endcase
 	end
@@ -65,9 +65,9 @@ module addr_decoder #(
 
     // Combinational assignments
     assign mvalid_out = mvalid & slave_en;
-    assign slave_addr_valid = (slave_addr < 3);
+    assign slave_addr_valid = (slave_addr < 3) & sready[slave_addr];    // check whether ready and valid
     assign ack = (state == CONNECT) & slave_addr_valid;     // If address invalid, do not ack
-    assign sready = sready1 & sready2 & sready3;
+    assign sready = {sready3, sready2, sready1};
 
     // Sequential output logic
 	always @(posedge clk) begin
@@ -85,6 +85,9 @@ module addr_decoder #(
 					if (mvalid) begin	// Have to send data
                         slave_addr[0] <= mwdata;
                         counter <= 1;
+                    end else if (split_grant) begin 
+                        slave_addr <= split_slave_addr;
+                        counter <= 'b0;
                     end else begin
                         slave_addr <= slave_addr;
                         counter <= 'b0;
@@ -109,6 +112,12 @@ module addr_decoder #(
                 WAIT : begin
                     slave_en <= 1;
                     ssel <= slave_addr[1:0];
+
+                    if (ssplit) 
+                        split_slave_addr <= slave_addr;
+                    else begin
+                        split_slave_addr <= split_slave_addr;
+                    end
                 end
 				
 				default: begin
