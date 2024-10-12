@@ -10,6 +10,9 @@ module addr_decoder #(
     input ssplit,       // split signal from slave
     input split_grant,      // signal from arbiter ending split
 
+    // ready signals from slave
+    input sready1, sready2, sready3,
+
     // valid signals going to slaves
     output mvalid1, mvalid2, mvalid3,
 
@@ -22,6 +25,7 @@ module addr_decoder #(
     reg slave_en;       // Enable slave connection
     wire mvalid_out;
     wire slave_addr_valid;  // Valid slave address
+    wire sready;
     reg [3:0] counter;
     reg [DEVICE_ADDR_WIDTH-1:0] split_slave_addr;
 
@@ -49,7 +53,7 @@ module addr_decoder #(
 			IDLE    : next_state = (mvalid) ? ADDR : IDLE;
 			ADDR    : next_state = (counter == DEVICE_ADDR_WIDTH-1) ? CONNECT : ADDR;
 			CONNECT : next_state = (slave_addr_valid) ? ((mvalid) ? WAIT : CONNECT) : IDLE;  
-            WAIT    : next_state = (!mvalid) ? IDLE : WAIT;
+            WAIT    : next_state = (sready) ? IDLE : WAIT;
 			default: next_state = IDLE;
 		endcase
 	end
@@ -63,6 +67,7 @@ module addr_decoder #(
     assign mvalid_out = mvalid & slave_en;
     assign slave_addr_valid = (slave_addr < 3);
     assign ack = (state == CONNECT) & slave_addr_valid;     // If address invalid, do not ack
+    assign sready = sready1 & sready2 & sready3;
 
     // Sequential output logic
 	always @(posedge clk) begin

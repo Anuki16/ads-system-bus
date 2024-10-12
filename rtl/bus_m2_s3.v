@@ -87,6 +87,9 @@ module bus_m2_s3 #(
         .mvalid1(s1_mvalid),
         .mvalid2(s2_mvalid),
         .mvalid3(s3_mvalid),
+        .sready1(s1_ready),
+        .sready2(s2_ready),
+        .sready3(s3_ready),
         .ssel(s_select),
         .ack(m_ack)
     );
