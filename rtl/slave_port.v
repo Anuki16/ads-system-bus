@@ -42,7 +42,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 		case (state)
 			IDLE  : next_state = (mvalid) ? ADDR : IDLE;
 			ADDR  : next_state = (counter == ADDR_WIDTH-1) ? ((mode) ? WDATA : SREADY) : ADDR;
-			SREADY : next_state = (mode) ? IDLE : RDATA; 
+			SREADY : next_state = (mode) ? IDLE : ((counter == 2) ? RDATA : SREADY); 
 			RDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : RDATA;
 			WDATA : next_state = (counter == DATA_WIDTH-1) ? SREADY : WDATA;
 			default: next_state = IDLE;
@@ -119,9 +119,11 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8)
 						smemwen <= 1'b1;
 						smemwdata <= wdata;
 						smemaddr <= addr;
+						counter <= 1'b0;
 					end else begin 
 						smemren <= 1'b1;						
 						smemaddr <= addr;
+						counter <= (counter == 2) ? 0 : (counter + 1);
 					end	
 				end
 			
