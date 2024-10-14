@@ -17,6 +17,7 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0, MEM_SIZE
     wire smemren; 
 	wire [ADDR_WIDTH-1:0] smemaddr; 
 	wire [DATA_WIDTH-1:0] smemwdata;
+    wire rvalid;
 
 
     slave_port #(
@@ -27,6 +28,7 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0, MEM_SIZE
         .clk(clk), 
         .rstn(rstn),
         .smemrdata(smemrdata),
+        .rvalid(rvalid),
         .smemwen(smemwen), 
         .smemren(smemren),
         .smemaddr(smemaddr), 
@@ -53,7 +55,8 @@ module slave #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0, MEM_SIZE
         .ren(smemren),
         .addr(smemaddr), 
         .wdata(smemwdata), 
-        .rdata(smemrdata) 
+        .rdata(smemrdata),
+        .rvalid(rvalid) 
     );
 
 endmodule

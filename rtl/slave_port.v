@@ -4,7 +4,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 
 	// Signals connecting to slave memory
 	input [DATA_WIDTH-1:0] smemrdata, // data read from the slave memory
-	
+	input rvalid,
 	output reg smemwen, smemren,
 	output reg [ADDR_WIDTH-1:0] smemaddr, //input address of slave
 	output reg [DATA_WIDTH-1:0] smemwdata, // data written to the slave memory
@@ -40,7 +40,8 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 			   WDATA = 3'b011,	// Receive data from master //3
 			   SREADY = 3'b101, //5
 			   SPLIT = 3'b100, // 4
-			   WAIT = 3'b110; //6
+			   WAIT = 3'b110, //6
+			   RVALID = 3'b111;
 
 	
 	// State variables
@@ -51,7 +52,8 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 		case (state)
 			IDLE  : next_state = (mvalid) ? ADDR : IDLE;
 			ADDR  : next_state = (counter == ADDR_WIDTH-1) ? ((mode) ? WDATA : SREADY) : ADDR;
-			SREADY : next_state = (mode) ? IDLE : ((SPLIT_EN) ? SPLIT : RDATA);
+			SREADY : next_state = (mode) ? IDLE : ((SPLIT_EN) ? SPLIT : RVALID);
+			RVALID : next_state = (rvalid) ? RDATA : RVALID;
 			SPLIT : next_state = (rcounter == LATENCY) ? WAIT : SPLIT;
 			WAIT : next_state = (split_grant) ? RDATA : WAIT;
 			RDATA : next_state = (counter == DATA_WIDTH-1) ? IDLE : RDATA;
@@ -136,6 +138,10 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 						smemren <= 1'b1;						
 						smemaddr <= addr;
 					end	
+				end
+
+				RVALID: begin
+					//waiting
 				end
 			
 				SPLIT : begin //wait for sometime
