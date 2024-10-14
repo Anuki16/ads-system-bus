@@ -9,14 +9,13 @@ module uart #(
 	input rstn,
 	output tx,
 	output tx_busy,
-	input ready_clr,
 	input rx,
 	output ready,
     output [DATA_WIDTH -1:0] data_output
 );
 
 
-	transmitter #(.CLOCKS_PER_PULSE(CLOCKS_PER_PULSE)) uart_tx (
+	uart_tx #(.CLOCKS_PER_PULSE(CLOCKS_PER_PULSE)) transmitter (
 		.data_in(data_input),
 		.data_en(data_en),
 		.clk(clk),
@@ -25,10 +24,9 @@ module uart #(
 		.tx_busy(tx_busy)
 	);
 	
-	receiver #(.CLOCKS_PER_PULSE(CLOCKS_PER_PULSE)) uart_rx (
+	uart_rx #(.CLOCKS_PER_PULSE(CLOCKS_PER_PULSE)) receiver (
 		.clk(clk),
 		.rstn(rstn),
-		.ready_clr(ready_clr),
 		.rx(rx),
 		.ready(ready),
 		.data_out(data_output)

@@ -1,4 +1,4 @@
-module transmitter #(
+module uart_tx #(
 	parameter CLOCKS_PER_PULSE = 16,
               DATA_WIDTH  =  8
 )

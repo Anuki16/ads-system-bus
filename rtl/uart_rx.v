@@ -1,11 +1,10 @@
-module receiver #(
+module uart_rx #(
 	parameter CLOCKS_PER_PULSE = 16,
               DATA_WIDTH  =  8
 )
 (
 	input clk,
 	input rstn,
-	input ready_clr,
 	input rx,
 	output reg  ready,
 	output [DATA_WIDTH - 1:0] data_out
