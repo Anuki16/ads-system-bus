@@ -20,9 +20,9 @@ module uart_tx #(
 	reg [1:0] state;
 
 	// Data and control signals
-	reg [DATA_WIDTH -1:0] data = 0;
-	reg [2:0] c_bits = 3'b0;
-	reg [$clog2(CLOCKS_PER_PULSE)-1:0] c_clocks = 0;
+	reg [DATA_WIDTH -1:0] data;
+	reg [$clog2(DATA_WIDTH)-1:0] c_bits;
+	reg [$clog2(CLOCKS_PER_PULSE)-1:0] c_clocks;
 	
 	// Sequential logic
 	always @(posedge clk or negedge rstn) begin
@@ -38,7 +38,7 @@ module uart_tx #(
 					if (data_en) begin
 						state <= TX_START;
 						data <= data_in;
-						c_bits <= 3'b0;
+						c_bits <= 0;
 						c_clocks <= 0;
 					end else tx <= 1'b1;
 				end
@@ -54,7 +54,7 @@ module uart_tx #(
 				TX_DATA: begin
 					if (c_clocks == CLOCKS_PER_PULSE-1) begin
 						c_clocks <= 0;
-						if (c_bits == 3'd7) begin
+						if (c_bits == DATA_WIDTH-1) begin
 							state <= TX_END;
 						end else begin
 							c_bits <= c_bits + 1;

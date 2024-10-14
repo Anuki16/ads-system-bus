@@ -18,7 +18,7 @@ module uart_rx #(
     	// State variable
 	reg [1:0] state;
 
-	reg  [2:0] c_bits;
+	reg  [$clog2(DATA_WIDTH)-1:0] c_bits;
 	reg   [$clog2(CLOCKS_PER_PULSE)-1:0] c_clocks;
 	
   	reg   [DATA_WIDTH -1:0] temp_data;
@@ -55,7 +55,7 @@ module uart_rx #(
 				if (c_clocks == CLOCKS_PER_PULSE-1) begin
 					c_clocks <= 0;
 					temp_data[c_bits] <= rx_sync;
-					if (c_bits == 3'd7) begin
+					if (c_bits == DATA_WIDTH-1) begin
 						state <= RX_END;
 						c_bits <= 0;
 					end else c_bits <= c_bits + 1;

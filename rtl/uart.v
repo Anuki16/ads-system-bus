@@ -1,9 +1,10 @@
 module uart #(
 	parameter CLOCKS_PER_PULSE = 5208,
-              DATA_WIDTH = 8
+    parameter TX_DATA_WIDTH = 8,
+	parameter RX_DATA_WIDTH = 8
 )
 (
-	input [DATA_WIDTH - 1:0] data_input,
+	input [TX_DATA_WIDTH - 1:0] data_input,
 	input data_en,
 	input clk,
 	input rstn,
@@ -11,11 +12,14 @@ module uart #(
 	output tx_busy,
 	input rx,
 	output ready,
-    output [DATA_WIDTH -1:0] data_output
+    output [RX_DATA_WIDTH -1:0] data_output
 );
 
 
-	uart_tx #(.CLOCKS_PER_PULSE(CLOCKS_PER_PULSE)) transmitter (
+	uart_tx #(
+		.CLOCKS_PER_PULSE(CLOCKS_PER_PULSE),
+		.DATA_WIDTH(TX_DATA_WIDTH)
+	) transmitter (
 		.data_in(data_input),
 		.data_en(data_en),
 		.clk(clk),
@@ -24,7 +28,10 @@ module uart #(
 		.tx_busy(tx_busy)
 	);
 	
-	uart_rx #(.CLOCKS_PER_PULSE(CLOCKS_PER_PULSE)) receiver (
+	uart_rx #(
+		.CLOCKS_PER_PULSE(CLOCKS_PER_PULSE),
+		.DATA_WIDTH(RX_DATA_WIDTH)
+	) receiver (
 		.clk(clk),
 		.rstn(rstn),
 		.rx(rx),

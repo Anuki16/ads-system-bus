@@ -4,7 +4,7 @@ module uart_tb;
 
     // Parameters
     parameter CLOCKS_PER_PULSE = 5208;  // For 9600 baud rate with 50 MHz clock
-    parameter DATA_WIDTH = 8;
+    parameter DATA_WIDTH = 25;
 
     // Testbench Signals
     reg clk;
@@ -24,7 +24,8 @@ module uart_tb;
     // Instantiate UART 1 (Transmitter)
     uart #(
         .CLOCKS_PER_PULSE(CLOCKS_PER_PULSE),
-        .DATA_WIDTH(DATA_WIDTH)
+        .TX_DATA_WIDTH(DATA_WIDTH),
+        .RX_DATA_WIDTH(8)
     ) uart1 (
         .data_input(data_input_1),
         .data_en(data_en_1),
@@ -40,7 +41,8 @@ module uart_tb;
     // Instantiate UART 2 (Receiver)
     uart #(
         .CLOCKS_PER_PULSE(CLOCKS_PER_PULSE),
-        .DATA_WIDTH(DATA_WIDTH)
+        .TX_DATA_WIDTH(8),
+        .RX_DATA_WIDTH(DATA_WIDTH)
     ) uart2 (
         .data_input(8'b0),  // No input data for uart2
         .data_en(1'b0),
@@ -99,7 +101,7 @@ module uart_tb;
 
         // Transmit and Receive Data
         $display("Starting UART Transmission...");
-        transmit_data(8'hA5);  // Transmit 0xA5
+        transmit_data(25'h15234A5);  // Transmit 0xA5
         monitor_reception;  // Monitor and display the received data
 
         // End simulation
