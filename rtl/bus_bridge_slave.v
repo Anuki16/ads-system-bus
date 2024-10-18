@@ -1,8 +1,6 @@
 module bus_bridge_slave #(
-	parameter ADDR_WIDTH = 16, 
 	parameter DATA_WIDTH = 8,
-	parameter SLAVE_MEM_ADDR_WIDTH = 12,
-    parameter BB_ADDR_WIDTH = 12,
+	parameter ADDR_WIDTH = 12,
     parameter UART_CLOCKS_PER_PULSE = 5208
 )(
     input clk, rstn,
@@ -20,8 +18,8 @@ module bus_bridge_slave #(
     output u_tx,
     input u_rx
 );
-    localparam UART_RX_DATA_WIDTH = DATA_WIDTH + BB_ADDR_WIDTH + 1;    // Receive all 3 info
-    localparam UART_TX_DATA_WIDTH = DATA_WIDTH;     // Transmit only read data
+    localparam UART_TX_DATA_WIDTH = DATA_WIDTH + ADDR_WIDTH + 1;    // Transmit all 3 info
+    localparam UART_RX_DATA_WIDTH = DATA_WIDTH;     // Receive only read data
     localparam SPLIT_EN = 1'b0;
     
 	// Signals connecting to slave port
@@ -39,8 +37,6 @@ module bus_bridge_slave #(
     wire u_rx_ready;
     wire [UART_RX_DATA_WIDTH-1:0] u_dout;
 
-    reg [BB_ADDR_WIDTH-1:0] bb_addr;
-    reg expect_rdata;
 
     // Instantiate modules
 
@@ -87,35 +83,27 @@ module bus_bridge_slave #(
     );
 
 
-
-    // Send write data from slave port to UART TX
-// Send write data from slave port to UART TX
-always @(posedge clk) begin
-    if (!rstn) begin
-        u_din <= 'b0;
-        u_en <= 1'b0;
-        expect_rdata <= 1'b0;
-    end
-    else begin
-        if (smemwen) begin
-            if (!expect_rdata) begin
-                // Send address first
-                u_din <= smemaddr;
-                expect_rdata <= 1'b1;
-            end
-            else begin
-                // Send data next
-                u_din <= smemwdata;
-                expect_rdata <= 1'b0;
-            end
-            u_en <= 1'b1; // Enable transmission
-        end
-        else begin
-            // No transmission when not writing
-            u_din <= u_din;
+    // Send write data from slave port to UART TX 
+    always @(posedge clk) begin
+        if (!rstn) begin
+            u_din <= 'b0;
             u_en <= 1'b0;
         end
+        else begin
+            if (smemwen & !u_tx_busy) begin
+                    // Send address , data, mode
+                    u_din <= {smemaddr, smemwdata, smemwen}; //[0:11] ADDR  [12:19] WDATA [20] mode
+                    u_en  <= 1'b1;
+                end
+            else begin
+                // No transmission when not writing
+                u_din <= u_din;
+                u_en <= 1'b0;
+            end
+        end
     end
-end
+
+    assign rvalid = u_rx_ready;
+    assign smemrdata = (smemren) ? u_dout : 8'd0;
 
 endmodule
