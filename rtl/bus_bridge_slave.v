@@ -6,10 +6,11 @@ module bus_bridge_slave #(
     input clk, rstn,
     // Signals connecting to serial bus
 	input swdata,	// write data and address from master
-	output srdata,	// read data to the master
 	input smode,	// 0 -  read, 1 - write, from master
 	input mvalid,	// wdata valid - (recieving data and address from master)
     input split_grant, // grant bus access in split
+    
+    output srdata,	// read data to the master
 	output svalid,	// rdata valid - (sending data from slave)
     output sready, //slave is ready for transaction
     output ssplit,
@@ -90,7 +91,7 @@ module bus_bridge_slave #(
             u_en <= 1'b0;
         end
         else begin
-            if (smemwen & !u_tx_busy) begin
+            if (smemwen ) begin
                     // Send address , data, mode
                     u_din <= {smemaddr, smemwdata, smemwen}; //[0:11] ADDR  [12:19] WDATA [20] mode
                     u_en  <= 1'b1;

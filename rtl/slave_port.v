@@ -41,7 +41,7 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 			   SREADY = 3'b101, //5
 			   SPLIT = 3'b100, // 4
 			   WAIT = 3'b110, //6
-			   RVALID = 3'b111;
+			   RVALID = 3'b111; //7
 
 	
 	// State variables
