@@ -93,7 +93,7 @@ module bus_bridge_slave #(
         else begin
             if (smemwen ) begin
                     // Send address , data, mode
-                    u_din <= {smemaddr, smemwdata, smemwen}; //[0:11] ADDR  [12:19] WDATA [20] mode
+                    u_din <= {smemwen, smemwdata, smemaddr}; //[0:11] ADDR  [12:19] WDATA [20] mode
                     u_en  <= 1'b1;
                 end
             else begin
