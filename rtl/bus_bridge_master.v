@@ -127,6 +127,7 @@ module bus_bridge_master #(
         .bus_addr(daddr)
     );
 
+    // TODO: fix handling long ready signal
     // Send UART received data to FIFO 
     always @(posedge clk) begin
         if (!rstn) begin
