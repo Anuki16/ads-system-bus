@@ -14,9 +14,9 @@ module bus_bridge_master #(
 	
 	// Signals connecting to serial bus
 	input mrdata,	// read data
-	output reg mwdata,	// write data and address
+	output mwdata,	// write data and address
 	output mmode,	// 0 -  read, 1 - write
-	output reg mvalid,	// wdata valid
+	output mvalid,	// wdata valid
 	input svalid,	// rdata valid
 
 	// Signals to arbiter
@@ -58,7 +58,7 @@ module bus_bridge_master #(
 
     reg [BB_ADDR_WIDTH-1:0] bb_addr;
     reg expect_rdata;
-    reg prev_u_ready;
+    reg prev_u_ready, prev_m_ready;
 
     // Instantiate modules
 
@@ -90,7 +90,7 @@ module bus_bridge_master #(
     // FIFO module
     fifo #(
         .DATA_WIDTH(UART_RX_DATA_WIDTH),
-        .DEPTH(DEPTH)
+        .DEPTH(8)
     ) fifo_queue (
         .clk(clk),
         .rstn(rstn),
@@ -161,7 +161,7 @@ module bus_bridge_master #(
         end
         else begin
             if (dready & !fifo_empty & !dvalid) begin
-                bb_addr <= fifo_dout[0:+BB_ADDR_WIDTH];
+                bb_addr <= fifo_dout[BB_ADDR_WIDTH-1:0];
                 dwdata <= fifo_dout[BB_ADDR_WIDTH+:DATA_WIDTH];
                 dmode <= fifo_dout[BB_ADDR_WIDTH + DATA_WIDTH];
                 dvalid <= 1'b1;
@@ -184,9 +184,12 @@ module bus_bridge_master #(
         if (!rstn) begin
             u_din <= 'b0;
             u_en <= 1'b0;
+            prev_m_ready <= 1'b0;
         end
         else begin
-            if (dready & expect_rdata) begin
+            prev_m_ready <= dready;
+            // Read request finished
+            if (!prev_m_ready & dready & expect_rdata) begin
                 u_din <= drdata;
                 u_en <= 1'b1;
             end

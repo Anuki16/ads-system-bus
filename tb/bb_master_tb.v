@@ -79,6 +79,22 @@ module bb_master_tb;
     wire [UART_TX_DATA_WIDTH - 1:0] ext_u_dout;
     wire ext_u_rx;
 
+    uart #(
+        .CLOCKS_PER_PULSE(5208),
+        .TX_DATA_WIDTH(UART_RX_DATA_WIDTH),
+        .RX_DATA_WIDTH(UART_TX_DATA_WIDTH)
+    ) extuart (
+        .data_input(ext_u_din),
+        .data_en(ext_u_en),
+        .clk(clk),
+        .rstn(rstn),
+        .tx(ext_u_tx),  // Transmitter output (tx)
+        .tx_busy(ext_u_tx_busy),
+        .rx(ext_u_rx),  
+        .ready(ext_u_rx_ready),   
+        .data_output(ext_u_dout)
+    );
+
     // Instantiate masters
     master_port #(
         .ADDR_WIDTH(ADDR_WIDTH),
@@ -295,6 +311,40 @@ module bb_master_tb;
             #20 ext_u_en = 0;
 
             wait (ext_u_rx_ready == 1);
+
+            if (rand_data2 != ext_u_dout) begin
+                $display("Bus bridge write or read to slave 0 failed at iteration %0d: location %x, expected %x, actual %x", 
+                            i, rand_addr2[10:0], rand_data2, ext_u_dout);
+            end else begin
+                $display("Bus bridge write and read to slave 0 successful at iteration %0d", i);
+            end
+
+            rand_addr2 = $random & 11'h7FF;
+            rand_data2 = $random;
+
+            // Write request to random location in slave 1
+            wait (ext_u_tx_busy == 0);
+            ext_u_din = {1'b1, rand_data2, 1'b1, rand_addr2[10:0]};
+            ext_u_en = 1;
+
+            #20 ext_u_en = 0;
+
+            // Send read request
+            wait (ext_u_tx_busy == 0);
+            ext_u_din = {1'b0, rand_data2, 1'b1, rand_addr2[10:0]};
+            ext_u_en = 1;
+
+            #20 ext_u_en = 0;
+
+            wait (ext_u_rx_ready == 0);
+            wait (ext_u_rx_ready == 1);
+
+            if (rand_data2 != ext_u_dout) begin
+                $display("Bus bridge write or read to slave 1 failed at iteration %0d: location %x, expected %x, actual %x", 
+                            i, rand_addr2[10:0], rand_data2, ext_u_dout);
+            end else begin
+                $display("Bus bridge write and read to slave 1 successful at iteration %0d", i);
+            end
 
         end
 
