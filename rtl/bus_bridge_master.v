@@ -58,6 +58,7 @@ module bus_bridge_master #(
 
     reg [BB_ADDR_WIDTH-1:0] bb_addr;
     reg expect_rdata;
+    reg prev_u_ready;
 
     // Instantiate modules
 
@@ -127,15 +128,17 @@ module bus_bridge_master #(
         .bus_addr(daddr)
     );
 
-    // TODO: fix handling long ready signal
     // Send UART received data to FIFO 
     always @(posedge clk) begin
         if (!rstn) begin
             fifo_din <= 'b0;
             fifo_enq <= 1'b0;
+            prev_u_ready <= 1'b0;
         end
         else begin
-            if (u_rx_ready) begin
+            prev_u_ready <= u_rx_ready;
+
+            if (u_rx_ready && !prev_u_ready) begin
                 fifo_din <= u_dout;
                 fifo_enq <= 1'b1;
             end
