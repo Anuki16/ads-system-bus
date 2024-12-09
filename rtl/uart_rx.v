@@ -45,6 +45,7 @@ module uart_rx #(
 				end
 			end
 			RX_START: begin
+				ready <= 1'b0;		// New data reading has started
 				if (c_clocks == CLOCKS_PER_PULSE/2-1) begin
 					state <= RX_DATA;
 					c_clocks <= 0;
