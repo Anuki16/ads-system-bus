@@ -2,14 +2,14 @@ module demo_top_bb #(
 	parameter ADDR_WIDTH = 16, 
 	parameter DATA_WIDTH = 8,
 	parameter SLAVE_MEM_ADDR_WIDTH = 13,
-    parameter BB_ADDR_WIDTH = 13,
+    parameter BB_ADDR_WIDTH = 16,
     parameter UART_CLOCKS_PER_PULSE = 5208
 )(
 	input clk, rstn,
 
     input start,
 	output ready,
-	input mode					// 0 - read, 1 - write
+	input mode,					// 0 - read, 1 - write
 
     input m_u_rx,
     input s_u_rx,
@@ -52,7 +52,7 @@ module demo_top_bb #(
         .m_u_rx(m_u_rx),
         .s_u_rx(s_u_rx),
         .m_u_tx(m_u_tx), 
-        .s_u_tx(s_u_rx)
+        .s_u_tx(s_u_tx)
     );
 
     master_bram memory (
@@ -75,7 +75,7 @@ module demo_top_bb #(
         else start_prev <= start; 
     end
 
-    localparam ADDR = 16'h1001;
+    localparam [15:0] ADDR = 16'b1000000000000001;
     localparam [4:0] WRITE_OFFSET = 16;
 
     localparam IDLE = 2'b00,
