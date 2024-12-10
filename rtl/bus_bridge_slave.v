@@ -95,7 +95,7 @@ module bus_bridge_slave #(
 	// Next state logic
 	always @(*) begin
 		case (state)
-			IDLE  : next_state = (smemwen) ? WSEND : ((smemren) ? RSEND :IDLE);
+			IDLE  : next_state = (!u_tx_busy) ? ((smemwen) ? WSEND : ((smemren) ? RSEND : IDLE)) : IDLE;
 			WSEND  : next_state = IDLE;
             RSEND  : next_state = RDATA;
             RDATA  : next_state = ((!u_tx_busy) && (u_rx_ready)) ? IDLE : RDATA;
