@@ -1,22 +1,22 @@
 module demo_top_bb #(
 	parameter ADDR_WIDTH = 16, 
 	parameter DATA_WIDTH = 8,
-	parameter SLAVE_MEM_ADDR_WIDTH = 12,
-    parameter BB_ADDR_WIDTH = 12,
+	parameter SLAVE_MEM_ADDR_WIDTH = 13,
+    parameter BB_ADDR_WIDTH = 13,
     parameter UART_CLOCKS_PER_PULSE = 5208
 )(
 	input clk, rstn,
 
     input start,
-	output d1_ready,
-	input mode,					// 0 - read, 1 - write
-    input d1_en
+	output ready,
+	input mode					// 0 - read, 1 - write
 );
 
 
 	wire [DATA_WIDTH-1:0] d1_wdata;   // write data
 	wire [DATA_WIDTH-1:0] d1_rdata; 	// read data
 	wire [ADDR_WIDTH-1:0] d1_addr; 
+	wire d1_start, d1_ready;
     reg d1_valid;
     reg d1_mode;
     wire s_ready;     // slaves are ready
@@ -64,7 +64,7 @@ module demo_top_bb #(
     wire edge_start;
     reg start_prev;
 
-    assign d1_start = (edge_start) & d1_en;
+    assign d1_start = edge_start;
     assign edge_start = (start_prev) & (!start);
 
     // Buffer the start signal
@@ -89,7 +89,7 @@ module demo_top_bb #(
     // Next state logic
 	always @(*) begin
 		case (state)
-			IDLE    : next_state = (start) ? ((!mode) ? SEND : READ) : IDLE;
+			IDLE    : next_state = (d1_start) ? ((!mode) ? SEND : READ) : IDLE;
 			READ    : next_state = (counter == 1) ? SEND : READ;
 			SEND    : next_state = (counter == 1) ? DONE : SEND; 
             DONE    : next_state = (d1_ready) ? IDLE : DONE;
@@ -119,7 +119,7 @@ module demo_top_bb #(
                     memwen <= 0;
                     counter <= 'b0;
 
-                    if (start) begin
+                    if (d1_start) begin
                         d1_mode <= mode;
 
                         if (mode) begin     // write to new location, otherwise read from same location

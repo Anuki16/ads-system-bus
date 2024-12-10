@@ -220,7 +220,7 @@ module top_with_bb_v1 #(
         .s3_ready(s3_ready),
         .s3_split(0),
 
-        .split_grant(split_grant)
+        .split_grant()
     );
 
     assign s_ready = s1_ready & s2_ready & s3_ready;

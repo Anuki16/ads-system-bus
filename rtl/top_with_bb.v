@@ -1,8 +1,8 @@
 module top_with_bb #(
 	parameter ADDR_WIDTH = 16, 
 	parameter DATA_WIDTH = 8,
-	parameter SLAVE_MEM_ADDR_WIDTH = 12,
-    parameter BB_ADDR_WIDTH = 12,
+	parameter SLAVE_MEM_ADDR_WIDTH = 13,
+    parameter BB_ADDR_WIDTH = 13,
     parameter UART_CLOCKS_PER_PULSE = 5208
 )(
 	input clk, rstn,
@@ -224,7 +224,7 @@ module top_with_bb #(
         .s3_ready(s3_ready),
         .s3_split(0),
 
-        .split_grant(split_grant)
+        .split_grant()
     );
 
     assign s_ready = s1_ready & s2_ready & s3_ready;
