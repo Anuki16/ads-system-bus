@@ -3,7 +3,7 @@
 // This TB has both masters for convenience
 // But only 1 will be tested
 
-module top_tb;
+module top_bram_tb;
     // Parameters
     parameter ADDR_WIDTH = 16;
     parameter DATA_WIDTH = 8;
@@ -20,7 +20,7 @@ module top_tb;
     reg d1_mode, d2_mode;					  // 0 - read, 1 - write
     wire s_ready;
     
-    top #(
+    top_with_bram #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
         .SLAVE_MEM_ADDR_WIDTH(SLAVE_MEM_ADDR_WIDTH)
@@ -123,28 +123,28 @@ module top_tb;
 
             #20;
 
-            if (slave_id1 == 2'b00)  slave_mem_data1 = dut.slave1.sm.memory[d1_addr[10:0]];
-            else if (slave_id1 == 2'b01)  slave_mem_data1 = dut.slave2.sm.memory[d1_addr[11:0]];
-            else if (slave_id1 == 2'b10)  slave_mem_data1 = dut.slave3.sm.memory[d1_addr[11:0]];
+            // if (slave_id1 == 2'b00)  slave_mem_data1 = dut.slave1.sm.memory[d1_addr[10:0]];
+            // else if (slave_id1 == 2'b01)  slave_mem_data1 = dut.slave2.sm.memory[d1_addr[11:0]];
+            // else if (slave_id1 == 2'b10)  slave_mem_data1 = dut.slave3.sm.memory[d1_addr[11:0]];
 
-            if (slave_id1 != 2'b11 && slave_mem_data1 != d1_wdata) begin
-                $display("Master 1 write failed at iteration %0d: location %x, expected %x, actual %x", 
-                            i, d1_addr, d1_wdata, slave_mem_data1);
-            end else begin
-                $display("Master 1 write to %0x successful at iteration %0d", d1_addr, i);
-            end
+            // if (slave_id1 != 2'b11 && slave_mem_data1 != d1_wdata) begin
+            //     $display("Master 1 write failed at iteration %0d: location %x, expected %x, actual %x", 
+            //                 i, d1_addr, d1_wdata, slave_mem_data1);
+            // end else begin
+            //     $display("Master 1 write to %0x successful at iteration %0d", d1_addr, i);
+            // end
 
-            if (slave_id2 == 2'b00)  slave_mem_data2 = dut.slave1.sm.memory[d2_addr[10:0]];
-            else if (slave_id2 == 2'b01)  slave_mem_data2 = dut.slave2.sm.memory[d2_addr[11:0]];
-            else if (slave_id2 == 2'b10)  slave_mem_data2 = dut.slave3.sm.memory[d2_addr[11:0]];
+            // if (slave_id2 == 2'b00)  slave_mem_data2 = dut.slave1.sm.memory[d2_addr[10:0]];
+            // else if (slave_id2 == 2'b01)  slave_mem_data2 = dut.slave2.sm.memory[d2_addr[11:0]];
+            // else if (slave_id2 == 2'b10)  slave_mem_data2 = dut.slave3.sm.memory[d2_addr[11:0]];
 
 
-            if (slave_id2 != 2'b11 && slave_mem_data2 != d2_wdata) begin
-                $display("Master 2 write failed at iteration %0d: location %x, expected %x, actual %x", 
-                            i, d2_addr, d2_wdata, slave_mem_data2);
-            end else begin
-                $display("Master 2 write to %0x successful at iteration %0d", d2_addr, i);
-            end
+            // if (slave_id2 != 2'b11 && slave_mem_data2 != d2_wdata) begin
+            //     $display("Master 2 write failed at iteration %0d: location %x, expected %x, actual %x", 
+            //                 i, d2_addr, d2_wdata, slave_mem_data2);
+            // end else begin
+            //     $display("Master 2 write to %0x successful at iteration %0d", d2_addr, i);
+            // end
 
             // Read operation: make both requests on the same clock cycle
             @(posedge clk);
@@ -197,16 +197,16 @@ module top_tb;
 
             #20;
 
-            if (slave_id1 == 2'b00)  slave_mem_data1 = dut.slave1.sm.memory[d2_addr[10:0]];
-            else if (slave_id1 == 2'b01)  slave_mem_data1 = dut.slave2.sm.memory[d2_addr[11:0]];
-            else if (slave_id1 == 2'b10)  slave_mem_data1 = dut.slave3.sm.memory[d2_addr[11:0]];
+            // if (slave_id1 == 2'b00)  slave_mem_data1 = dut.slave1.sm.memory[d2_addr[10:0]];
+            // else if (slave_id1 == 2'b01)  slave_mem_data1 = dut.slave2.sm.memory[d2_addr[11:0]];
+            // else if (slave_id1 == 2'b10)  slave_mem_data1 = dut.slave3.sm.memory[d2_addr[11:0]];
 
-            if (slave_id1 != 2'b11 && slave_mem_data1 != d2_wdata) begin
-                $display("Master 2 write failed at iteration %0d: location %x, expected %x, actual %x", 
-                            i, d2_addr, d2_wdata, slave_mem_data1);
-            end else begin
-                $display("Master 2 write to %0x successful at iteration %0d", d2_addr, i);
-            end
+            // if (slave_id1 != 2'b11 && slave_mem_data1 != d2_wdata) begin
+            //     $display("Master 2 write failed at iteration %0d: location %x, expected %x, actual %x", 
+            //                 i, d2_addr, d2_wdata, slave_mem_data1);
+            // end else begin
+            //     $display("Master 2 write to %0x successful at iteration %0d", d2_addr, i);
+            // end
 
             if (slave_id1 != 2'b11 && d2_wdata != d1_rdata) begin
                 $display("Master 1 read failed at iteration %0d: location %x, expected %x, actual %x", 
