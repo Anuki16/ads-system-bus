@@ -23,7 +23,8 @@ module bus_bridge_slave #(
     localparam UART_RX_DATA_WIDTH = DATA_WIDTH;     // Receive only read data
     localparam SPLIT_EN = 1'b0;
     
-
+    // Slave port ready
+    wire spready;
 
 	// Signals connecting to slave port
 	wire [DATA_WIDTH-1:0] smemrdata;
@@ -63,7 +64,7 @@ module bus_bridge_slave #(
         .mvalid(mvalid),	
         .split_grant(split_grant),
         .svalid(svalid),	
-        .sready(sready),
+        .sready(spready),
         .ssplit(ssplit)
     );
 
@@ -95,10 +96,10 @@ module bus_bridge_slave #(
 	// Next state logic
 	always @(*) begin
 		case (state)
-			IDLE  : next_state = (!u_tx_busy) ? ((smemwen) ? WSEND : ((smemren) ? RSEND : IDLE)) : IDLE;
-			WSEND  : next_state = IDLE;
-            RSEND  : next_state = RDATA;
-            RDATA  : next_state = ((!u_tx_busy) && (u_rx_ready)) ? IDLE : RDATA;
+			IDLE   : next_state = (smemwen) ? WSEND : ((smemren) ? RSEND : IDLE);
+			WSEND  : next_state = (u_tx_busy) ? WSEND : IDLE;
+            RSEND  : next_state = (u_tx_busy) ? RSEND : RDATA;
+            RDATA  : next_state = (!smemren) ? IDLE : RDATA;
 			default: next_state = IDLE;
 		endcase
 	end
@@ -144,8 +145,8 @@ module bus_bridge_slave #(
         end
     end
 
-    assign rvalid = (state == RDATA) && (next_state == IDLE);
+    assign rvalid = (state == RDATA) && (!u_tx_busy) && (u_rx_ready);
     assign smemrdata = (smemren) ? u_dout : {DATA_WIDTH{1'b0}};
-
+    assign sready = spready && !smemwen && !smemren && (state == IDLE);
 
 endmodule
