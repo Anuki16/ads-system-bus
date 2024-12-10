@@ -28,7 +28,6 @@ module demo_top_bb #(
 
 
     // Signals connecting to master device
-	wire [ADDR_WIDTH-1:0] daddr;
     reg [4:0] memaddr;
     reg memwen;
 
@@ -105,7 +104,7 @@ module demo_top_bb #(
 	end
 
     assign ready = (state == IDLE);
-    assign daddr = ADDR;
+    assign d1_addr = ADDR;
 
     always @(posedge clk) begin
         if (!rstn) begin
@@ -125,9 +124,9 @@ module demo_top_bb #(
                         d1_mode <= mode;
 
                         if (mode) begin     // write to new location, otherwise read from same location
-                            memaddr <= daddr[4:0];
+                            memaddr <= d1_addr[4:0];
                         end else begin
-                            memaddr <= WRITE_OFFSET + daddr[4:0];
+                            memaddr <= WRITE_OFFSET + d1_addr[4:0];
                         end
                         
                     end else begin
