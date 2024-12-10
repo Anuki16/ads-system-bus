@@ -10,6 +10,11 @@ module demo_top_bb #(
     input start,
 	output ready,
 	input mode					// 0 - read, 1 - write
+
+    input m_u_rx,
+    input s_u_rx,
+    output m_u_tx,
+    output s_u_tx
 );
 
 
@@ -20,10 +25,7 @@ module demo_top_bb #(
     reg d1_valid;
     reg d1_mode;
     wire s_ready;     // slaves are ready
-    wire m_u_rx;
-    wire s_u_rx;
-    wire m_u_tx; 
-    wire s_u_tx;
+
 
     // Signals connecting to master device
 	wire [ADDR_WIDTH-1:0] daddr;
