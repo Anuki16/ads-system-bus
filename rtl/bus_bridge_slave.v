@@ -96,6 +96,11 @@ module bus_bridge_slave #(
                     u_din <= {smemwen, smemwdata, smemaddr}; //[0:11] ADDR  [12:19] WDATA [20] mode
                     u_en  <= 1'b1;
                 end
+            else if (smemren) begin
+                    // Send read address, mode
+                    u_din <= {1'b0, {DATA_WIDTH{1'b0}}, smemaddr}; //[0:11] ADDR  [12:19] WDATA [20] mode
+                    u_en  <= 1'b1;                
+            end
             else begin
                 // No transmission when not writing
                 u_din <= u_din;
@@ -104,7 +109,8 @@ module bus_bridge_slave #(
         end
     end
 
-    assign rvalid = u_rx_ready;
-    assign smemrdata = (smemren) ? u_dout : 8'd0;
+    assign rvalid = (!u_tx_busy) && (u_rx_ready);
+    assign smemrdata = (smemren) ? u_dout : {DATA_WIDTH{1'b0}};
+
 
 endmodule

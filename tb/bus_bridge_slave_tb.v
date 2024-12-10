@@ -118,7 +118,7 @@ module bus_bridge_slave_tb;
         begin
             #20
             @(posedge ready_2);  // Wait for data to be ready
-            $display("Received Data: %b", data_output_2);  // Display received data
+            $display("Received Data (Write Mode): %b", data_output_2);  // Display received data
         end
         #20
         ///// Testing Read operation
@@ -151,7 +151,11 @@ module bus_bridge_slave_tb;
 		#20 swdata = 0;
 		#20 swdata = 0;
 		#20 swdata = 1; // MSB
-
+        begin
+            #20
+            @(posedge ready_2);  // Wait for data to be ready
+            $display("Received Data (Read Mode): %b", data_output_2);  // Display received data
+        end
         begin
             #40
             @(posedge clk);
