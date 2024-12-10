@@ -2,7 +2,8 @@ module demo_master #(
 	parameter ADDR_WIDTH = 16, 
 	parameter DATA_WIDTH = 8,
 	parameter SLAVE_MEM_ADDR_WIDTH = 12,
-    parameter SLAVE_COUNT = 3
+    parameter SLAVE_COUNT = 3,
+    parameter ADDR_START = 0
 )(
 	input clk, rstn,
 	
@@ -27,6 +28,8 @@ module demo_master #(
 );
 
     localparam DEVICE_ADDR_WIDTH = ADDR_WIDTH - SLAVE_MEM_ADDR_WIDTH;
+    localparam [ADDR_WIDTH-1:0] ADDRS [0:3] = {ADDR_START + 12'h0000, ADDR_START + 12'h1001, ADDR_START + 12'h2002, 12'h0001};
+    localparam WRITE_OFFSET = 16;
 
     // Signals connecting to master device
 	wire [DATA_WIDTH-1:0] dwdata; // write data
@@ -38,8 +41,6 @@ module demo_master #(
 
     reg [4:0] memaddr;
     reg memwen;
-    reg [DEVICE_ADDR_WIDTH-1:0] slave_id;
-    reg [SLAVE_MEM_ADDR_WIDTH-1:0] slave_mem_addr;
 
     master_port #(
         .ADDR_WIDTH(ADDR_WIDTH),
@@ -80,6 +81,7 @@ module demo_master #(
     // State variables
 	reg [1:0] state, next_state;
     reg [1:0] counter;
+    reg [1:0] idx;
 
     // Next state logic
 	always @(*) begin
@@ -98,16 +100,15 @@ module demo_master #(
 	end
 
     assign ready = (state == IDLE);
-    assign daddr = {slave_id, slave_mem_addr};
+    assign daddr = ADDRS[idx];
 
     always @(posedge clk) begin
         if (!rstn) begin
             memaddr <= 'b0;
             memwen <= 0;
-            slave_id <= 'b0;
-            slave_mem_addr <= 'b0;
             dvalid <= 0;
             dmode <= 0;
+            idx <= 2'b11;
         end 
         else begin
             case (state)
@@ -118,22 +119,18 @@ module demo_master #(
 
                     if (start) begin
                         dmode <= mode;
+                        idx <= idx + 2'b01;
 
                         if (mode) begin     // write to new location, otherwise read from same location
-                            memaddr <= memaddr + 1;
-                            slave_id <= (slave_id == SLAVE_COUNT-1) ? 'b0 : (slave_id + 1);
-                            slave_mem_addr <= slave_mem_addr + 1;
+                            memaddr <= daddr[3:0];
                         end else begin
-                            memaddr <= memaddr;
-                            slave_id <= slave_id;
-                            slave_mem_addr <= slave_mem_addr;
+                            memaddr <= WRITE_OFFSET + daddr[3:0];
                         end
                         
                     end else begin
                         dmode <= dmode;
                         memaddr <= memaddr;
-                        slave_id <= slave_id;
-                        slave_mem_addr <= slave_mem_addr;
+                        idx <= idx;
                     end
                 end
 
@@ -160,10 +157,10 @@ module demo_master #(
                 default: begin
                     memaddr <= memaddr;
                     memwen <= memwen;
-                    slave_id <= slave_id;
-                    slave_mem_addr <= slave_mem_addr;
                     dvalid <= dvalid;
                     dmode <= dmode;
+                    counter <= counter;
+                    idx <= idx;
                 end
 
             endcase
