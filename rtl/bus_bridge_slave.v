@@ -23,6 +23,8 @@ module bus_bridge_slave #(
     localparam UART_RX_DATA_WIDTH = DATA_WIDTH;     // Receive only read data
     localparam SPLIT_EN = 1'b0;
     
+
+
 	// Signals connecting to slave port
 	wire [DATA_WIDTH-1:0] smemrdata;
 	wire smemwen;
@@ -83,7 +85,28 @@ module bus_bridge_slave #(
         .data_output(u_dout)
     );
 
+    localparam IDLE  = 2'b00,    //0
+               WSEND  = 2'b01, 	// Write data
+               RSEND = 2'b10,    // Read data
+               RDATA = 2'b11;    // Wait until receive
+	// State variables
+	reg [1:0] state, next_state;
 
+	// Next state logic
+	always @(*) begin
+		case (state)
+			IDLE  : next_state = (smemwen) ? WSEND : ((smemren) ? RSEND :IDLE);
+			WSEND  : next_state = IDLE;
+            RSEND  : next_state = RDATA;
+            RDATA  : next_state = ((!u_tx_busy) && (u_rx_ready)) ? IDLE : RDATA;
+			default: next_state = IDLE;
+		endcase
+	end
+
+	// State transition logic
+	always @(posedge clk) begin
+		state <= (!rstn) ? IDLE : next_state;
+	end
     // Send write data from slave port to UART TX 
     always @(posedge clk) begin
         if (!rstn) begin
@@ -91,25 +114,37 @@ module bus_bridge_slave #(
             u_en <= 1'b0;
         end
         else begin
-            if (smemwen ) begin
+            case (state) 
+                IDLE : begin
+                    u_din <= u_din;
+                    u_en <= 1'b0;
+                end
+
+                WSEND : begin
                     // Send address , data, mode
-                    u_din <= {smemwen, smemwdata, smemaddr}; //[0:11] ADDR  [12:19] WDATA [20] mode
+                    u_din <= {1'b1, smemwdata, smemaddr}; //[0:11] ADDR  [12:19] WDATA [20] mode
                     u_en  <= 1'b1;
                 end
-            else if (smemren) begin
+                RSEND : begin
                     // Send read address, mode
                     u_din <= {1'b0, {DATA_WIDTH{1'b0}}, smemaddr}; //[0:11] ADDR  [12:19] WDATA [20] mode
                     u_en  <= 1'b1;                
-            end
-            else begin
-                // No transmission when not writing
-                u_din <= u_din;
-                u_en <= 1'b0;
-            end
+                end
+                RDATA : begin
+                    // No transmission when not writing
+                    u_din <= u_din;
+                    u_en <= 1'b0;
+                end
+
+                default : begin
+                    u_din <= u_din;
+                    u_en <= 1'b0;
+                end
+            endcase
         end
     end
 
-    assign rvalid = (!u_tx_busy) && (u_rx_ready);
+    assign rvalid = (state == RDATA) && (next_state == IDLE);
     assign smemrdata = (smemren) ? u_dout : {DATA_WIDTH{1'b0}};
 
 
