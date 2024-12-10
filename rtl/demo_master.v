@@ -3,7 +3,7 @@ module demo_master #(
 	parameter DATA_WIDTH = 8,
 	parameter SLAVE_MEM_ADDR_WIDTH = 12,
     parameter SLAVE_COUNT = 3,
-    parameter ADDR_START = 0
+    parameter [ADDR_WIDTH-1:0] ADDR_START = 0
 )(
 	input clk, rstn,
 	
@@ -28,8 +28,8 @@ module demo_master #(
 );
 
     localparam DEVICE_ADDR_WIDTH = ADDR_WIDTH - SLAVE_MEM_ADDR_WIDTH;
-    localparam [ADDR_WIDTH-1:0] ADDRS [0:3] = {ADDR_START + 12'h0000, ADDR_START + 12'h1001, ADDR_START + 12'h2002, 12'h0001};
-    localparam WRITE_OFFSET = 16;
+    localparam [0:(4 * ADDR_WIDTH-1)] ADDRS = {ADDR_START + 16'h0000, ADDR_START + 16'h1001, ADDR_START + 16'h2002, 16'h0001};
+    localparam [4:0] WRITE_OFFSET = 16;
 
     // Signals connecting to master device
 	wire [DATA_WIDTH-1:0] dwdata; // write data
@@ -100,7 +100,7 @@ module demo_master #(
 	end
 
     assign ready = (state == IDLE);
-    assign daddr = ADDRS[idx];
+    assign daddr = ADDRS[(ADDR_WIDTH * idx)+:ADDR_WIDTH];
 
     always @(posedge clk) begin
         if (!rstn) begin
@@ -108,7 +108,7 @@ module demo_master #(
             memwen <= 0;
             dvalid <= 0;
             dmode <= 0;
-            idx <= 2'b11;
+            idx <= 2'b00;
         end 
         else begin
             case (state)
@@ -119,7 +119,6 @@ module demo_master #(
 
                     if (start) begin
                         dmode <= mode;
-                        idx <= idx + 2'b01;
 
                         if (mode) begin     // write to new location, otherwise read from same location
                             memaddr <= daddr[3:0];
@@ -130,7 +129,6 @@ module demo_master #(
                     end else begin
                         dmode <= dmode;
                         memaddr <= memaddr;
-                        idx <= idx;
                     end
                 end
 
@@ -148,9 +146,11 @@ module demo_master #(
                     dvalid <= 0;
                     if (dready) begin
                         memwen <= (!dmode);
+                        idx <= idx + 2'b01;
                     end 
                     else begin
                         memwen <= 0;
+                        idx <= idx;
                     end
                 end
 

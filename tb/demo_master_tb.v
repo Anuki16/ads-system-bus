@@ -126,6 +126,17 @@ module demo_master_tb;
 
             #20;
 
+            wait (ready == 1);
+            @(posedge clk);
+            mode = 1;
+            start = 1;
+
+            #20;
+            start = 0;
+            wait (ready == 1 && sready == 1);
+
+            #20;
+
             // Read operation
             @(posedge clk);
             mode = 0;                         // Set mode to read
