@@ -17,6 +17,7 @@ module demo_master #(
 	// Signals to arbiter
 	output mbreq,
 	input mbgrant,
+    input msplit,
 
 	// Acknowledgement from address decoder 
 	input ack,
@@ -62,7 +63,8 @@ module demo_master #(
         .svalid(svalid),
         .mbreq(mbreq),
         .mbgrant(mbgrant),
-        .ack(ack)
+        .ack(ack),
+        .msplit(msplit)
     );
 
     master_bram memory (

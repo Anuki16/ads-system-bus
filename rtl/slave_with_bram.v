@@ -15,12 +15,12 @@ module slave_with_bram #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, MEM_SIZE = 4
     wire smemren; 
 	wire [ADDR_WIDTH-1:0] smemaddr; 
 	wire [DATA_WIDTH-1:0] smemwdata;
-
+    wire rvalid;
 
     slave_port #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
-    )sp(
+    ) sp (
         .clk(clk), 
         .rstn(rstn),
         .smemrdata(smemrdata),
@@ -33,7 +33,10 @@ module slave_with_bram #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, MEM_SIZE = 4
         .smode(smode),
         .mvalid(mvalid),	
         .svalid(svalid),	
-        .sready(sready)
+        .sready(sready),
+        .rvalid(rvalid),
+        .ssplit(),
+        .split_grant(0)
     );
 
 
@@ -41,14 +44,15 @@ module slave_with_bram #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, MEM_SIZE = 4
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
         .MEM_SIZE(MEM_SIZE)
-    )sm(
+    ) sm (
         .clk(clk), 
         .rstn(rstn), 
         .wen(smemwen),
         .ren(smemren),
         .addr(smemaddr), 
         .wdata(smemwdata), 
-        .rdata(smemrdata) 
+        .rdata(smemrdata),
+        .rvalid(rvalid)
     );
 
 endmodule
