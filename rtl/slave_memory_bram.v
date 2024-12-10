@@ -11,7 +11,7 @@ module slave_memory_bram #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, MEM_SIZE =
 );
 
 	localparam MEM_ADDR_WIDTH = $clog2(MEM_SIZE);
-	
+	reg ren_prev;
 	generate
 		if (MEM_SIZE == 4096) begin
 			slave_bram memory (
@@ -42,12 +42,12 @@ module slave_memory_bram #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, MEM_SIZE =
 		else begin
 			if ((!ren_prev) && ren) begin
 				rvalid <= 0;
-				ren_prev <= ren;
 			end	else if (ren) begin
 				rvalid <= 1;
 			end else begin
 				rvalid <= 0;
 			end
+			ren_prev <= ren;
 		end
 	end
 
