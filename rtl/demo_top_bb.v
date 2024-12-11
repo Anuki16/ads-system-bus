@@ -1,8 +1,8 @@
 module demo_top_bb #(
 	parameter ADDR_WIDTH = 16, 
 	parameter DATA_WIDTH = 8,
-	parameter SLAVE_MEM_ADDR_WIDTH = 13,
-    parameter BB_ADDR_WIDTH = 13,
+	parameter SLAVE_MEM_ADDR_WIDTH = 14,
+    parameter BB_ADDR_WIDTH = 16,
     parameter UART_CLOCKS_PER_PULSE = 5208
 )(
 	input clk, rstn,
@@ -74,7 +74,7 @@ module demo_top_bb #(
         else start_prev <= start; 
     end
 
-    localparam [15:0] ADDR = 16'b0100_0000_0000_0001;
+    localparam [15:0] ADDR = 16'b1000_0000_0000_0001;//16'b0100_0000_0000_0001;
     localparam [4:0] WRITE_OFFSET = 16;
 
     localparam IDLE = 2'b00,
