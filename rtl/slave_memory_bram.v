@@ -7,11 +7,11 @@ module slave_memory_bram #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, MEM_SIZE =
 	input [DATA_WIDTH-1:0] wdata, // data to be written in the slave
 
 	output [DATA_WIDTH-1:0] rdata, // data to be read from the slave
-	output rvalid
+	output  reg rvalid
 );
 
 	localparam MEM_ADDR_WIDTH = $clog2(MEM_SIZE);
-	
+	reg ren_prev;
 	generate
 		if (MEM_SIZE == 4096) begin
 			slave_bram memory (
@@ -34,6 +34,23 @@ module slave_memory_bram #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, MEM_SIZE =
 		end
 	endgenerate
 
-	assign rvalid = 1'b1;
+	always @(posedge clk) begin
+		if (!rstn) begin
+			rvalid <= 0;
+			ren_prev <= 0;
+		end
+		else begin
+			if ((!ren_prev) && ren) begin
+				rvalid <= 0;
+			end	else if (ren) begin
+				rvalid <= 1;
+			end else begin
+				rvalid <= 0;
+			end
+			ren_prev <= ren;
+		end
+	end
+
+
 
 endmodule

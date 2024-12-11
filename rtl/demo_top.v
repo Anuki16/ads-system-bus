@@ -81,7 +81,7 @@ module demo_top #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
         .SLAVE_MEM_ADDR_WIDTH(SLAVE_MEM_ADDR_WIDTH),
-        .ADDR_START(0)
+        .ADDRS({16'h0000, 16'h1001, 16'h2002, 16'h0009})
     ) master1 (
         .clk(clk),
         .rstn(rstn),
@@ -103,7 +103,7 @@ module demo_top #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
         .SLAVE_MEM_ADDR_WIDTH(SLAVE_MEM_ADDR_WIDTH),
-        .ADDR_START(3)
+        .ADDRS({16'h0003, 16'h1004, 16'h2005, 16'h0009})
     ) master2 (
         .clk(clk),
         .rstn(rstn),

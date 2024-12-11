@@ -3,7 +3,7 @@ module demo_master #(
 	parameter DATA_WIDTH = 8,
 	parameter SLAVE_MEM_ADDR_WIDTH = 12,
     parameter SLAVE_COUNT = 3,
-    parameter [ADDR_WIDTH-1:0] ADDR_START = 0
+    parameter [0:(4 * ADDR_WIDTH-1)] ADDRS = {16'h0000, 16'h1001, 16'h2002, 16'h0009}
 )(
 	input clk, rstn,
 	
@@ -29,7 +29,6 @@ module demo_master #(
 );
 
     localparam DEVICE_ADDR_WIDTH = ADDR_WIDTH - SLAVE_MEM_ADDR_WIDTH;
-    localparam [0:(4 * ADDR_WIDTH-1)] ADDRS = {ADDR_START + 16'h0000, ADDR_START + 16'h1001, ADDR_START + 16'h2002, 16'h0001};
     localparam [4:0] WRITE_OFFSET = 16;
 
     // Signals connecting to master device

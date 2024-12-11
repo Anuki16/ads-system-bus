@@ -134,11 +134,9 @@ module slave_port #(parameter ADDR_WIDTH = 12, DATA_WIDTH = 8, SPLIT_EN = 0)
 						smemwen <= 1'b1;
 						smemwdata <= wdata;
 						smemaddr <= addr;
-						counter <= 1'b0;
 					end else begin 
 						smemren <= 1'b1;						
 						smemaddr <= addr;
-						counter <= (counter == 2) ? 0 : (counter + 1);
 					end	
 				end
 
