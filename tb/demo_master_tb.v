@@ -18,7 +18,6 @@ module demo_master_tb;
     wire mvalid;				  // Write data valid
     wire svalid;					  // Read data valid from serial bus
     wire sready;
-    wire msplit;
 
     // Arbiter signals
     wire breq1, bgrant1, bgrant2, msel;
@@ -45,12 +44,11 @@ module demo_master_tb;
         .svalid(svalid),
         .mbreq(breq1),
         .mbgrant(bgrant1),
-        .ack(ack),
-        .msplit(msplit)
+        .ack(ack)
     );
 
     // Initialize slave
-    slave_with_bram #(
+    slave #(
         .ADDR_WIDTH(SLAVE_MEM_ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH)
     ) slave_dev (
@@ -75,11 +73,7 @@ module demo_master_tb;
         .msel(msel),
         .sready1(sready),
         .sready2(1),
-        .sreadysp(1),
-        .ssplit(0),
-        .msplit1(msplit),
-        .msplit2(),
-        .split_grant()
+        .sready3(1)
     );
 
     addr_decoder #(
@@ -97,9 +91,7 @@ module demo_master_tb;
         .sready2(1'b1),
         .sready3(1'b1),
         .ssel(ssel),
-        .ack(ack),
-        .ssplit(0),
-        .split_grant(0)
+        .ack(ack)
     );
 
     // Generate Clock

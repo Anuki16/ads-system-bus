@@ -24,7 +24,6 @@ module demo_top #(
 	wire         m1_breq;
 	wire        m1_bgrant;
     wire        m1_ack;
-    wire        m1_split;
 
     // Master 2
     wire        m2_rdata;	// read data
@@ -35,7 +34,6 @@ module demo_top #(
 	wire         m2_breq;
 	wire        m2_bgrant;
     wire        m2_ack;
-    wire        m2_split;
 
     // Slave 1
     wire        s1_rdata;	// read data
@@ -60,8 +58,6 @@ module demo_top #(
 	wire        s3_mvalid;	// wdata valid
 	wire        s3_svalid;	// rdata valid
     wire        s3_ready;
-
-    wire        split_grant;
 
     wire edge_start;
     reg start_prev;
@@ -95,8 +91,7 @@ module demo_top #(
         .svalid(m1_svalid),
         .mbreq(m1_breq),
         .mbgrant(m1_bgrant),
-        .ack(m1_ack),
-        .msplit(m1_split)
+        .ack(m1_ack)
     );
 
     demo_master #(
@@ -117,8 +112,7 @@ module demo_top #(
         .svalid(m2_svalid),
         .mbreq(m2_breq),
         .mbgrant(m2_bgrant),
-        .ack(m2_ack),
-        .msplit(m2_split)
+        .ack(m2_ack)
     );
 
     // Initialize slave
@@ -185,7 +179,6 @@ module demo_top #(
         .m1_breq(m1_breq),
         .m1_bgrant(m1_bgrant),
         .m1_ack(m1_ack),
-        .m1_split(m1_split),
     
         // Master 2 connections
         .m2_rdata(m2_rdata),
@@ -196,7 +189,6 @@ module demo_top #(
         .m2_breq(m2_breq),
         .m2_bgrant(m2_bgrant),
         .m2_ack(m2_ack),
-        .m2_split(m2_split),
 
         // Slave 1 connections
         .s1_rdata(s1_rdata),
@@ -218,10 +210,7 @@ module demo_top #(
         .s3_mode(s3_mode),
         .s3_mvalid(s3_mvalid),
         .s3_svalid(s3_svalid),
-        .s3_ready(s3_ready),
-        .s3_split(0),
-
-        .split_grant(split_grant)
+        .s3_ready(s3_ready)
     );
 
 endmodule
