@@ -2,9 +2,9 @@
 
 module demo_top_tb;
     // Parameters
-	parameter ADDR_WIDTH = 16, 
-	parameter DATA_WIDTH = 8,
-	parameter SLAVE_MEM_ADDR_WIDTH = 12
+	localparam ADDR_WIDTH = 16;
+	localparam DATA_WIDTH = 8;
+	localparam SLAVE_MEM_ADDR_WIDTH = 12;
 
     // DUT Signals
     reg clk, rstn;
