@@ -3,3 +3,4 @@ system-bus/
 quartus/
 *.bak
 *.wcfg
+quartus_bb/
