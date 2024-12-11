@@ -42,7 +42,7 @@ module demo_top_tb;
 
         // Reset the DUT
         rstn = 0;
-        start = 0;
+        start = 1;
         d1_en = 0;
         d2_en = 0;
         d1_mode = 0;
@@ -57,10 +57,10 @@ module demo_top_tb;
         d1_mode = 1;
         d1_en = 1;
         d2_en = 0;
-        start = 1;
+        start = 0;
 
         #20;
-        start = 0;
+        start = 1;
         wait (d1_ready == 1 && d2_ready == 1);
 
         #20;
@@ -68,10 +68,10 @@ module demo_top_tb;
         // Read operation: Master 1
         @(posedge clk);
         d1_mode = 0;                         // Set mode to read
-        start = 1;                        // Assert valid signal
+        start = 0;                        // Assert valid signal
 
         #20;
-        start = 0;
+        start = 1;
         wait (d1_ready == 1 && d2_ready == 1);
 
         // Write Operation: Sending data to the bus master 2
@@ -79,10 +79,10 @@ module demo_top_tb;
         d2_mode = 1;
         d1_en = 0;
         d2_en = 1;
-        start = 1;
+        start = 0;
 
         #20;
-        start = 0;
+        start = 1;
         wait (d1_ready == 1 && d2_ready == 1);
 
         #20;
@@ -90,10 +90,10 @@ module demo_top_tb;
         // Read operation: Master 1
         @(posedge clk);
         d2_mode = 0;                         // Set mode to read
-        start = 1;                        // Assert valid signal
+        start = 0;                        // Assert valid signal
 
         #20;
-        start = 0;
+        start = 1;
         wait (d1_ready == 1 && d2_ready == 1);
 
         //Both masters
@@ -103,10 +103,10 @@ module demo_top_tb;
         d2_mode = 1;
         d1_en = 1;
         d2_en = 1;
-        start = 1;
+        start = 0;
 
         #20;
-        start = 0;
+        start = 1;
         wait (d1_ready == 1 && d2_ready == 1);
 
         #20;
@@ -114,10 +114,10 @@ module demo_top_tb;
         @(posedge clk);
         d1_mode = 0;
         d2_mode = 0;
-        start = 1;
+        start = 0;
 
         #20;
-        start = 0;
+        start = 1;
         wait (d1_ready == 1 && d2_ready == 1);
 
         // Small delay before next iteration
